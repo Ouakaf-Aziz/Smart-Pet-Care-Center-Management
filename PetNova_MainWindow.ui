@@ -1,0 +1,2086 @@
+<?xml version='1.0' encoding='utf-8'?>
+<ui version="4.0">
+ <class>MainWindow</class>
+ <widget class="QMainWindow" name="MainWindow">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>1280</width>
+    <height>800</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>PetNova - Code Crew</string>
+  </property>
+  <property name="minimumWidth">
+   <number>1024</number>
+  </property>
+  <property name="minimumHeight">
+   <number>680</number>
+  </property>
+  <property name="styleSheet">
+   <string notr="true">QWidget {
+    font-family: "Arial";
+    font-size: 11pt;
+    color: #1F2A37;
+}
+QMainWindow {
+    background-color: #F4F8F7;
+}
+/* ---- Sidebar ---- */
+#sidebarFrame {
+    background-color: #0F766E;
+}
+#labelLogo {
+    color: #FFFFFF;
+    font-size: 20pt;
+    font-weight: bold;
+    padding: 18px 0px;
+}
+#sidebarFrame QPushButton {
+    color: #FFFFFF;
+    text-align: left;
+    padding-left: 20px;
+    border: none;
+    background: transparent;
+    font-size: 11pt;
+    font-weight: bold;
+}
+#sidebarFrame QPushButton:hover {
+    background-color: #0C5F58;
+}
+#sidebarFrame QPushButton:checked {
+    background-color: #0B4F4A;
+    border-left: 4px solid #F28C28;
+}
+/* ---- Page titles ---- */
+#labelTitrePageAnimal, #labelTitrePageServices, #labelTitrePageRdv,
+#labelTitrePageEmployes, #labelTitrePageStock {
+    font-size: 20pt;
+    font-weight: bold;
+    color: #0B4F4A;
+    padding-bottom: 4px;
+}
+/* ---- Inputs ---- */
+QLineEdit, QComboBox, QDateEdit, QPlainTextEdit {
+    background-color: #FFFFFF;
+    border: 1px solid #CBD5D3;
+    border-radius: 6px;
+    padding: 5px 8px;
+}
+QLineEdit:focus, QComboBox:focus, QDateEdit:focus, QPlainTextEdit:focus {
+    border: 2px solid #0F766E;
+}
+QLineEdit:read-only {
+    background-color: #EAF2F1;
+    color: #5C6B69;
+}
+QComboBox::drop-down {
+    border: none;
+    width: 24px;
+}
+QComboBox QAbstractItemView {
+    background-color: #FFFFFF;
+    border: 1px solid #CBD5D3;
+    selection-background-color: #CDEAE6;
+    selection-color: #1F2A37;
+    outline: none;
+}
+/* ---- Scrollbars ---- */
+QScrollBar:vertical {
+    background: #F4F8F7;
+    width: 10px;
+    margin: 2px;
+}
+QScrollBar::handle:vertical {
+    background: #CBD5D3;
+    border-radius: 5px;
+    min-height: 24px;
+}
+QScrollBar::handle:vertical:hover {
+    background: #9AA6A4;
+}
+QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical {
+    height: 0px;
+}
+/* ---- Tables ---- */
+QTableWidget {
+    background-color: #FFFFFF;
+    border: 1px solid #CBD5D3;
+    border-radius: 8px;
+    gridline-color: #E3EAE9;
+}
+QHeaderView::section {
+    background-color: #0F766E;
+    color: #FFFFFF;
+    font-weight: bold;
+    padding: 6px;
+    border: none;
+}
+QTableWidget::item {
+    padding: 4px;
+}
+QTableWidget::item:selected {
+    background-color: #CDEAE6;
+    color: #1F2A37;
+}
+/* ---- Action buttons (all modules) : Ajouter ---- */
+#pushButtonAjouterAnimal, #pushButtonAjouterServices, #pushButtonAjouterRdv,
+#pushButtonAjouterEmployes, #pushButtonAjouterStock, #pushButtonEnregistrerAnimal {
+    background-color: #0F766E;
+    color: #FFFFFF;
+    font-weight: bold;
+    border: none;
+    border-radius: 6px;
+}
+#pushButtonAjouterAnimal:hover, #pushButtonAjouterServices:hover, #pushButtonAjouterRdv:hover,
+#pushButtonAjouterEmployes:hover, #pushButtonAjouterStock:hover, #pushButtonEnregistrerAnimal:hover {
+    background-color: #0C5F58;
+}
+/* ---- Modifier ---- */
+#pushButtonModifierAnimal, #pushButtonModifierServices, #pushButtonModifierRdv,
+#pushButtonModifierEmployes, #pushButtonModifierStock {
+    background-color: #F28C28;
+    color: #FFFFFF;
+    font-weight: bold;
+    border: none;
+    border-radius: 6px;
+}
+#pushButtonModifierAnimal:hover, #pushButtonModifierServices:hover, #pushButtonModifierRdv:hover,
+#pushButtonModifierEmployes:hover, #pushButtonModifierStock:hover {
+    background-color: #E07B16;
+}
+/* ---- Supprimer ---- */
+#pushButtonSupprimerAnimal, #pushButtonSupprimerServices, #pushButtonSupprimerRdv,
+#pushButtonSupprimerEmployes, #pushButtonSupprimerStock {
+    background-color: #C0392B;
+    color: #FFFFFF;
+    font-weight: bold;
+    border: none;
+    border-radius: 6px;
+}
+#pushButtonSupprimerAnimal:hover, #pushButtonSupprimerServices:hover, #pushButtonSupprimerRdv:hover,
+#pushButtonSupprimerEmployes:hover, #pushButtonSupprimerStock:hover {
+    background-color: #A5311F;
+}
+/* ---- Export / Statistiques ---- */
+#pushButtonExporterPdfAnimal, #pushButtonStatistiquesAnimal,
+#pushButtonExporterPdfServices, #pushButtonStatistiquesServices,
+#pushButtonExporterPdfRdv, #pushButtonStatistiquesRdv,
+#pushButtonExporterPdfEmployes, #pushButtonStatistiquesEmployes,
+#pushButtonExporterPdfStock, #pushButtonStatistiquesStock {
+    background-color: #0B4F4A;
+    color: #FFFFFF;
+    font-weight: bold;
+    border: none;
+    border-radius: 6px;
+}
+#pushButtonExporterPdfAnimal:hover, #pushButtonStatistiquesAnimal:hover,
+#pushButtonExporterPdfServices:hover, #pushButtonStatistiquesServices:hover,
+#pushButtonExporterPdfRdv:hover, #pushButtonStatistiquesRdv:hover,
+#pushButtonExporterPdfEmployes:hover, #pushButtonStatistiquesEmployes:hover,
+#pushButtonExporterPdfStock:hover, #pushButtonStatistiquesStock:hover {
+    background-color: #083E3A;
+}
+/* ---- Innovative buttons (chatbot / rappels) ---- */
+#pushButtonChatbotAnimal, #pushButtonRappelsSanteAnimal {
+    background-color: #5C6B69;
+    color: #FFFFFF;
+    font-weight: bold;
+    border: none;
+    border-radius: 6px;
+}
+#pushButtonChatbotAnimal:hover, #pushButtonRappelsSanteAnimal:hover {
+    background-color: #46524F;
+}
+/* ---- Annuler ---- */
+#pushButtonAnnulerAnimal {
+    background-color: #9AA6A4;
+    color: #FFFFFF;
+    font-size: 11pt;
+    font-weight: bold;
+    border: none;
+    border-radius: 6px;
+}
+#pushButtonAnnulerAnimal:hover {
+    background-color: #808C8A;
+}
+/* ---- Detail panel (Animaux form) ---- */
+#frameDetailAnimal {
+    background-color: #FFFFFF;
+    border: 1px solid #CBD5D3;
+    border-radius: 12px;
+}
+#labelDetailTitreAnimal {
+    font-size: 13pt;
+    font-weight: bold;
+    color: #0B4F4A;
+}
+#labelChampIdAnimal, #labelChampNomAnimal, #labelChampEspeceAnimal, #labelChampSexeAnimal,
+#labelChampNaissanceAnimal, #labelChampPhotoAnimal, #labelChampProprietaireAnimal,
+#labelChampTelProprietaireAnimal, #labelChampEmailProprietaireAnimal {
+    font-size: 9pt;
+    font-weight: bold;
+    color: #6B7A78;
+}
+#pushButtonChoisirPhotoAnimal {
+    background-color: #EAF2F1;
+    color: #0B4F4A;
+    font-weight: bold;
+    border: 1px solid #CBD5D3;
+    border-radius: 6px;
+}
+#pushButtonChoisirPhotoAnimal:hover {
+    background-color: #CDEAE6;
+}</string>
+  </property>
+  <widget class="QWidget" name="centralwidget">
+   <layout class="QHBoxLayout" name="outerLayout" stretch="0,1">
+    <property name="spacing">
+     <number>0</number>
+    </property>
+    <item>
+     <widget class="QFrame" name="sidebarFrame">
+      <property name="maximumWidth">
+       <number>230</number>
+      </property>
+      <property name="minimumWidth">
+       <number>210</number>
+      </property>
+      <property name="frameShape">
+       <enum>QFrame::StyledPanel</enum>
+      </property>
+      <layout class="QVBoxLayout" name="sidebarLayout">
+       <property name="spacing">
+        <number>4</number>
+       </property>
+       <item>
+        <widget class="QLabel" name="labelLogo">
+         <property name="text">
+          <string>PetNova</string>
+         </property>
+         <property name="alignment">
+          <set>Qt::AlignCenter</set>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QPushButton" name="btnAnimaux">
+         <property name="text">
+          <string>Animaux</string>
+         </property>
+         <property name="checkable">
+          <bool>true</bool>
+         </property>
+         <property name="minimumHeight">
+          <number>46</number>
+         </property>
+         <property name="cursor">
+          <cursorShape>PointingHandCursor</cursorShape>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QPushButton" name="btnServices">
+         <property name="text">
+          <string>Services</string>
+         </property>
+         <property name="checkable">
+          <bool>true</bool>
+         </property>
+         <property name="minimumHeight">
+          <number>46</number>
+         </property>
+         <property name="cursor">
+          <cursorShape>PointingHandCursor</cursorShape>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QPushButton" name="btnRdv">
+         <property name="text">
+          <string>Rendez-vous</string>
+         </property>
+         <property name="checkable">
+          <bool>true</bool>
+         </property>
+         <property name="minimumHeight">
+          <number>46</number>
+         </property>
+         <property name="cursor">
+          <cursorShape>PointingHandCursor</cursorShape>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QPushButton" name="btnEmployes">
+         <property name="text">
+          <string>Employes</string>
+         </property>
+         <property name="checkable">
+          <bool>true</bool>
+         </property>
+         <property name="minimumHeight">
+          <number>46</number>
+         </property>
+         <property name="cursor">
+          <cursorShape>PointingHandCursor</cursorShape>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QPushButton" name="btnStock">
+         <property name="text">
+          <string>Stock</string>
+         </property>
+         <property name="checkable">
+          <bool>true</bool>
+         </property>
+         <property name="minimumHeight">
+          <number>46</number>
+         </property>
+         <property name="cursor">
+          <cursorShape>PointingHandCursor</cursorShape>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <spacer name="sidebarSpacer">
+         <property name="orientation">
+          <enum>Qt::Vertical</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>40</width>
+           <height>20</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+      </layout>
+     </widget>
+    </item>
+    <item>
+     <widget class="QStackedWidget" name="stackedWidget">
+      <property name="currentIndex">
+       <number>0</number>
+      </property>
+      <widget class="QWidget" name="page_animaux">
+       <layout class="QVBoxLayout" name="verticalLayoutAnimauxRoot">
+        <property name="spacing">
+         <number>14</number>
+        </property>
+        <property name="leftMargin">
+         <number>28</number>
+        </property>
+        <property name="topMargin">
+         <number>24</number>
+        </property>
+        <property name="rightMargin">
+         <number>28</number>
+        </property>
+        <property name="bottomMargin">
+         <number>24</number>
+        </property>
+        <item>
+         <widget class="QLabel" name="labelTitrePageAnimal">
+          <property name="text">
+           <string>Gestion des animaux</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <layout class="QHBoxLayout" name="horizontalLayoutFiltresAnimal">
+          <property name="spacing">
+           <number>12</number>
+          </property>
+          <item>
+           <widget class="QLineEdit" name="lineEditRechercheAnimal">
+            <property name="minimumSize">
+             <size>
+              <width>0</width>
+              <height>38</height>
+             </size>
+            </property>
+            <property name="placeholderText">
+             <string>Rechercher un animal (nom, espece, proprietaire)...</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QComboBox" name="comboBoxTriAnimal">
+            <property name="minimumSize">
+             <size>
+              <width>170</width>
+              <height>38</height>
+             </size>
+            </property>
+            <item>
+             <property name="text">
+              <string>Trier par : Nom</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>Trier par : Espece</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>Trier par : Date de naissance</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>Trier par : Proprietaire</string>
+             </property>
+            </item>
+           </widget>
+          </item>
+          <item>
+           <widget class="QComboBox" name="comboBoxFiltreEspece">
+            <property name="minimumSize">
+             <size>
+              <width>170</width>
+              <height>38</height>
+             </size>
+            </property>
+            <item>
+             <property name="text">
+              <string>Espece : Toutes</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>Chien</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>Chat</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>Oiseau</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>Lapin</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>Autre</string>
+             </property>
+            </item>
+           </widget>
+          </item>
+         </layout>
+        </item>
+        <item>
+         <layout class="QHBoxLayout" name="horizontalLayoutBoutonsAnimal">
+          <property name="spacing">
+           <number>10</number>
+          </property>
+          <item>
+           <widget class="QPushButton" name="pushButtonAjouterAnimal">
+            <property name="minimumSize">
+             <size>
+              <width>110</width>
+              <height>40</height>
+             </size>
+            </property>
+            <property name="cursor">
+             <cursorShape>PointingHandCursor</cursorShape>
+            </property>
+            <property name="text">
+             <string>Ajouter</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPushButton" name="pushButtonModifierAnimal">
+            <property name="minimumSize">
+             <size>
+              <width>110</width>
+              <height>40</height>
+             </size>
+            </property>
+            <property name="cursor">
+             <cursorShape>PointingHandCursor</cursorShape>
+            </property>
+            <property name="text">
+             <string>Modifier</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPushButton" name="pushButtonSupprimerAnimal">
+            <property name="minimumSize">
+             <size>
+              <width>110</width>
+              <height>40</height>
+             </size>
+            </property>
+            <property name="cursor">
+             <cursorShape>PointingHandCursor</cursorShape>
+            </property>
+            <property name="text">
+             <string>Supprimer</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPushButton" name="pushButtonExporterPdfAnimal">
+            <property name="minimumSize">
+             <size>
+              <width>130</width>
+              <height>40</height>
+             </size>
+            </property>
+            <property name="cursor">
+             <cursorShape>PointingHandCursor</cursorShape>
+            </property>
+            <property name="text">
+             <string>Exporter PDF</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPushButton" name="pushButtonStatistiquesAnimal">
+            <property name="minimumSize">
+             <size>
+              <width>130</width>
+              <height>40</height>
+             </size>
+            </property>
+            <property name="cursor">
+             <cursorShape>PointingHandCursor</cursorShape>
+            </property>
+            <property name="text">
+             <string>Statistiques</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPushButton" name="pushButtonChatbotAnimal">
+            <property name="minimumSize">
+             <size>
+              <width>150</width>
+              <height>40</height>
+             </size>
+            </property>
+            <property name="cursor">
+             <cursorShape>PointingHandCursor</cursorShape>
+            </property>
+            <property name="text">
+             <string>Chatbot diagnostic</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPushButton" name="pushButtonRappelsSanteAnimal">
+            <property name="minimumSize">
+             <size>
+              <width>150</width>
+              <height>40</height>
+             </size>
+            </property>
+            <property name="cursor">
+             <cursorShape>PointingHandCursor</cursorShape>
+            </property>
+            <property name="text">
+             <string>Rappels de sante</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <spacer name="spacerBoutonsAnimal">
+            <property name="orientation">
+             <enum>Qt::Horizontal</enum>
+            </property>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>40</width>
+              <height>20</height>
+             </size>
+            </property>
+           </spacer>
+          </item>
+         </layout>
+        </item>
+        <item>
+         <layout class="QHBoxLayout" name="horizontalLayoutContenuAnimal">
+          <property name="spacing">
+           <number>18</number>
+          </property>
+          <item>
+           <widget class="QTableWidget" name="tableWidgetAnimaux">
+            <property name="editTriggers">
+             <set>QAbstractItemView::NoEditTriggers</set>
+            </property>
+            <property name="alternatingRowColors">
+             <bool>true</bool>
+            </property>
+            <property name="selectionMode">
+             <enum>QAbstractItemView::SingleSelection</enum>
+            </property>
+            <property name="selectionBehavior">
+             <enum>QAbstractItemView::SelectRows</enum>
+            </property>
+            <property name="showGrid">
+             <bool>true</bool>
+            </property>
+            <property name="sortingEnabled">
+             <bool>false</bool>
+            </property>
+            <attribute name="horizontalHeaderStretchLastSection">
+             <bool>true</bool>
+            </attribute>
+            <attribute name="verticalHeaderVisible">
+             <bool>false</bool>
+            </attribute>
+            <column>
+             <property name="text">
+              <string>ID</string>
+             </property>
+            </column>
+            <column>
+             <property name="text">
+              <string>Nom</string>
+             </property>
+            </column>
+            <column>
+             <property name="text">
+              <string>Espece</string>
+             </property>
+            </column>
+            <column>
+             <property name="text">
+              <string>Sexe</string>
+             </property>
+            </column>
+            <column>
+             <property name="text">
+              <string>Date de naissance</string>
+             </property>
+            </column>
+            <column>
+             <property name="text">
+              <string>Proprietaire</string>
+             </property>
+            </column>
+            <column>
+             <property name="text">
+              <string>Telephone proprietaire</string>
+             </property>
+            </column>
+            <column>
+             <property name="text">
+              <string>Suivi sante</string>
+             </property>
+            </column>
+           </widget>
+          </item>
+          <item>
+           <widget class="QFrame" name="frameDetailAnimal">
+            <property name="minimumSize">
+             <size>
+              <width>340</width>
+              <height>0</height>
+             </size>
+            </property>
+            <property name="maximumSize">
+             <size>
+              <width>360</width>
+              <height>16777215</height>
+             </size>
+            </property>
+            <layout class="QVBoxLayout" name="verticalLayoutDetailAnimal">
+             <property name="spacing">
+              <number>8</number>
+             </property>
+             <property name="leftMargin">
+              <number>18</number>
+             </property>
+             <property name="topMargin">
+              <number>18</number>
+             </property>
+             <property name="rightMargin">
+              <number>18</number>
+             </property>
+             <property name="bottomMargin">
+              <number>18</number>
+             </property>
+             <item>
+              <widget class="QLabel" name="labelDetailTitreAnimal">
+               <property name="text">
+                <string>Details de l'animal</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <layout class="QVBoxLayout" name="verticalLayoutIdAnimal">
+               <property name="spacing">
+                <number>2</number>
+               </property>
+               <item>
+                <widget class="QLabel" name="labelChampIdAnimal">
+                 <property name="text">
+                  <string>ID animal</string>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QLineEdit" name="lineEditIdAnimal">
+                 <property name="minimumSize">
+                  <size>
+                   <width>0</width>
+                   <height>36</height>
+                  </size>
+                 </property>
+                 <property name="readOnly">
+                  <bool>true</bool>
+                 </property>
+                 <property name="placeholderText">
+                  <string>Genere</string>
+                 </property>
+                </widget>
+               </item>
+              </layout>
+             </item>
+             <item>
+              <layout class="QVBoxLayout" name="verticalLayoutNomAnimal">
+               <property name="spacing">
+                <number>2</number>
+               </property>
+               <item>
+                <widget class="QLabel" name="labelChampNomAnimal">
+                 <property name="text">
+                  <string>Nom</string>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QLineEdit" name="lineEditNomAnimal">
+                 <property name="minimumSize">
+                  <size>
+                   <width>0</width>
+                   <height>36</height>
+                  </size>
+                 </property>
+                 <property name="placeholderText">
+                  <string>Ex. : Luna</string>
+                 </property>
+                </widget>
+               </item>
+              </layout>
+             </item>
+             <item>
+              <layout class="QHBoxLayout" name="horizontalLayoutEspeceSexeAnimal">
+               <property name="spacing">
+                <number>10</number>
+               </property>
+               <item>
+                <layout class="QVBoxLayout" name="verticalLayoutEspeceAnimal">
+                 <property name="spacing">
+                  <number>2</number>
+                 </property>
+                 <item>
+                  <widget class="QLabel" name="labelChampEspeceAnimal">
+                   <property name="text">
+                    <string>Espece</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item>
+                  <widget class="QComboBox" name="comboBoxEspeceAnimal">
+                   <property name="minimumSize">
+                    <size>
+                     <width>0</width>
+                     <height>36</height>
+                    </size>
+                   </property>
+                   <item>
+                    <property name="text">
+                     <string>Chien</string>
+                    </property>
+                   </item>
+                   <item>
+                    <property name="text">
+                     <string>Chat</string>
+                    </property>
+                   </item>
+                   <item>
+                    <property name="text">
+                     <string>Oiseau</string>
+                    </property>
+                   </item>
+                   <item>
+                    <property name="text">
+                     <string>Lapin</string>
+                    </property>
+                   </item>
+                   <item>
+                    <property name="text">
+                     <string>Autre</string>
+                    </property>
+                   </item>
+                  </widget>
+                 </item>
+                </layout>
+               </item>
+               <item>
+                <layout class="QVBoxLayout" name="verticalLayoutSexeAnimal">
+                 <property name="spacing">
+                  <number>2</number>
+                 </property>
+                 <item>
+                  <widget class="QLabel" name="labelChampSexeAnimal">
+                   <property name="text">
+                    <string>Sexe</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item>
+                  <widget class="QComboBox" name="comboBoxSexeAnimal">
+                   <property name="minimumSize">
+                    <size>
+                     <width>0</width>
+                     <height>36</height>
+                    </size>
+                   </property>
+                   <item>
+                    <property name="text">
+                     <string>Male</string>
+                    </property>
+                   </item>
+                   <item>
+                    <property name="text">
+                     <string>Femelle</string>
+                    </property>
+                   </item>
+                  </widget>
+                 </item>
+                </layout>
+               </item>
+              </layout>
+             </item>
+             <item>
+              <layout class="QVBoxLayout" name="verticalLayoutNaissanceAnimal">
+               <property name="spacing">
+                <number>2</number>
+               </property>
+               <item>
+                <widget class="QLabel" name="labelChampNaissanceAnimal">
+                 <property name="text">
+                  <string>Date de naissance</string>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QDateEdit" name="dateEditNaissanceAnimal">
+                 <property name="minimumSize">
+                  <size>
+                   <width>0</width>
+                   <height>36</height>
+                  </size>
+                 </property>
+                 <property name="calendarPopup">
+                  <bool>true</bool>
+                 </property>
+                </widget>
+               </item>
+              </layout>
+             </item>
+             <item>
+              <layout class="QVBoxLayout" name="verticalLayoutPhotoFieldAnimal">
+               <property name="spacing">
+                <number>2</number>
+               </property>
+               <item>
+                <widget class="QLabel" name="labelChampPhotoAnimal">
+                 <property name="text">
+                  <string>Photo</string>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <layout class="QHBoxLayout" name="horizontalLayoutPhotoAnimal">
+                 <property name="spacing">
+                  <number>8</number>
+                 </property>
+                 <item>
+                  <widget class="QPushButton" name="pushButtonChoisirPhotoAnimal">
+                   <property name="minimumSize">
+                    <size>
+                     <width>0</width>
+                     <height>36</height>
+                    </size>
+                   </property>
+                   <property name="cursor">
+                    <cursorShape>PointingHandCursor</cursorShape>
+                   </property>
+                   <property name="text">
+                    <string>Choisir une photo</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item>
+                  <widget class="QLineEdit" name="lineEditPhotoAnimal">
+                   <property name="minimumSize">
+                    <size>
+                     <width>0</width>
+                     <height>36</height>
+                    </size>
+                   </property>
+                   <property name="readOnly">
+                    <bool>true</bool>
+                   </property>
+                   <property name="placeholderText">
+                    <string>Aucune photo selectionnee</string>
+                   </property>
+                  </widget>
+                 </item>
+                </layout>
+               </item>
+              </layout>
+             </item>
+             <item>
+              <layout class="QVBoxLayout" name="verticalLayoutProprietaireAnimal">
+               <property name="spacing">
+                <number>2</number>
+               </property>
+               <item>
+                <widget class="QLabel" name="labelChampProprietaireAnimal">
+                 <property name="text">
+                  <string>Proprietaire</string>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QLineEdit" name="lineEditProprietaireAnimal">
+                 <property name="minimumSize">
+                  <size>
+                   <width>0</width>
+                   <height>36</height>
+                  </size>
+                 </property>
+                 <property name="placeholderText">
+                  <string>Nom du proprietaire</string>
+                 </property>
+                </widget>
+               </item>
+              </layout>
+             </item>
+             <item>
+              <layout class="QVBoxLayout" name="verticalLayoutTelProprietaireAnimal">
+               <property name="spacing">
+                <number>2</number>
+               </property>
+               <item>
+                <widget class="QLabel" name="labelChampTelProprietaireAnimal">
+                 <property name="text">
+                  <string>Telephone proprietaire</string>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QLineEdit" name="lineEditTelephoneProprietaireAnimal">
+                 <property name="minimumSize">
+                  <size>
+                   <width>0</width>
+                   <height>36</height>
+                  </size>
+                 </property>
+                 <property name="placeholderText">
+                  <string>Ex. : 20 123 456</string>
+                 </property>
+                </widget>
+               </item>
+              </layout>
+             </item>
+             <item>
+              <layout class="QVBoxLayout" name="verticalLayoutEmailProprietaireAnimal">
+               <property name="spacing">
+                <number>2</number>
+               </property>
+               <item>
+                <widget class="QLabel" name="labelChampEmailProprietaireAnimal">
+                 <property name="text">
+                  <string>Email proprietaire</string>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QLineEdit" name="lineEditEmailProprietaireAnimal">
+                 <property name="minimumSize">
+                  <size>
+                   <width>0</width>
+                   <height>36</height>
+                  </size>
+                 </property>
+                 <property name="placeholderText">
+                  <string>exemple@mail.com</string>
+                 </property>
+                </widget>
+               </item>
+              </layout>
+             </item>
+             <item>
+              <spacer name="spacerDetailAnimal">
+               <property name="orientation">
+                <enum>Qt::Vertical</enum>
+               </property>
+               <property name="sizeHint" stdset="0">
+                <size>
+                 <width>40</width>
+                 <height>20</height>
+                </size>
+               </property>
+              </spacer>
+             </item>
+             <item>
+              <layout class="QHBoxLayout" name="horizontalLayoutActionsAnimal">
+               <property name="spacing">
+                <number>10</number>
+               </property>
+               <item>
+                <widget class="QPushButton" name="pushButtonEnregistrerAnimal">
+                 <property name="minimumSize">
+                  <size>
+                   <width>0</width>
+                   <height>42</height>
+                  </size>
+                 </property>
+                 <property name="cursor">
+                  <cursorShape>PointingHandCursor</cursorShape>
+                 </property>
+                 <property name="text">
+                  <string>Enregistrer</string>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QPushButton" name="pushButtonAnnulerAnimal">
+                 <property name="minimumSize">
+                  <size>
+                   <width>0</width>
+                   <height>42</height>
+                  </size>
+                 </property>
+                 <property name="cursor">
+                  <cursorShape>PointingHandCursor</cursorShape>
+                 </property>
+                 <property name="text">
+                  <string>Annuler</string>
+                 </property>
+                </widget>
+               </item>
+              </layout>
+             </item>
+            </layout>
+           </widget>
+          </item>
+         </layout>
+        </item>
+       </layout>
+      </widget>
+      <widget class="QWidget" name="page_services">
+       <layout class="QVBoxLayout" name="verticalLayoutServicesRoot">
+        <property name="spacing">
+         <number>14</number>
+        </property>
+        <property name="leftMargin">
+         <number>28</number>
+        </property>
+        <property name="topMargin">
+         <number>24</number>
+        </property>
+        <property name="rightMargin">
+         <number>28</number>
+        </property>
+        <property name="bottomMargin">
+         <number>24</number>
+        </property>
+        <item>
+         <widget class="QLabel" name="labelTitrePageServices">
+          <property name="text">
+           <string>Gestion des services</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <layout class="QHBoxLayout" name="horizontalLayoutFiltresServices">
+          <property name="spacing">
+           <number>12</number>
+          </property>
+          <item>
+           <widget class="QLineEdit" name="lineEditRechercheServices">
+            <property name="minimumSize">
+             <size>
+              <width>0</width>
+              <height>38</height>
+             </size>
+            </property>
+            <property name="placeholderText">
+             <string>Rechercher un service...</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QComboBox" name="comboBoxFiltreServices">
+            <property name="minimumSize">
+             <size>
+              <width>190</width>
+              <height>38</height>
+             </size>
+            </property>
+            <item>
+             <property name="text">
+              <string>Type : Tous</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>Consultation</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>Vaccination</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>Traitement</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>Chirurgie</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>Education</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>Comportement</string>
+             </property>
+            </item>
+           </widget>
+          </item>
+         </layout>
+        </item>
+        <item>
+         <layout class="QHBoxLayout" name="horizontalLayoutBoutonsServices">
+          <property name="spacing">
+           <number>10</number>
+          </property>
+          <item>
+           <widget class="QPushButton" name="pushButtonAjouterServices">
+            <property name="minimumSize">
+             <size>
+              <width>110</width>
+              <height>40</height>
+             </size>
+            </property>
+            <property name="cursor">
+             <cursorShape>PointingHandCursor</cursorShape>
+            </property>
+            <property name="text">
+             <string>Ajouter</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPushButton" name="pushButtonModifierServices">
+            <property name="minimumSize">
+             <size>
+              <width>110</width>
+              <height>40</height>
+             </size>
+            </property>
+            <property name="cursor">
+             <cursorShape>PointingHandCursor</cursorShape>
+            </property>
+            <property name="text">
+             <string>Modifier</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPushButton" name="pushButtonSupprimerServices">
+            <property name="minimumSize">
+             <size>
+              <width>110</width>
+              <height>40</height>
+             </size>
+            </property>
+            <property name="cursor">
+             <cursorShape>PointingHandCursor</cursorShape>
+            </property>
+            <property name="text">
+             <string>Supprimer</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPushButton" name="pushButtonExporterPdfServices">
+            <property name="minimumSize">
+             <size>
+              <width>130</width>
+              <height>40</height>
+             </size>
+            </property>
+            <property name="cursor">
+             <cursorShape>PointingHandCursor</cursorShape>
+            </property>
+            <property name="text">
+             <string>Exporter PDF</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPushButton" name="pushButtonStatistiquesServices">
+            <property name="minimumSize">
+             <size>
+              <width>130</width>
+              <height>40</height>
+             </size>
+            </property>
+            <property name="cursor">
+             <cursorShape>PointingHandCursor</cursorShape>
+            </property>
+            <property name="text">
+             <string>Statistiques</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <spacer name="spacerBoutonsServices">
+            <property name="orientation">
+             <enum>Qt::Horizontal</enum>
+            </property>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>40</width>
+              <height>20</height>
+             </size>
+            </property>
+           </spacer>
+          </item>
+         </layout>
+        </item>
+        <item>
+         <widget class="QTableWidget" name="tableWidgetServices">
+          <property name="editTriggers">
+           <set>QAbstractItemView::NoEditTriggers</set>
+          </property>
+          <property name="alternatingRowColors">
+           <bool>true</bool>
+          </property>
+          <property name="selectionMode">
+           <enum>QAbstractItemView::SingleSelection</enum>
+          </property>
+          <property name="selectionBehavior">
+           <enum>QAbstractItemView::SelectRows</enum>
+          </property>
+          <property name="showGrid">
+           <bool>true</bool>
+          </property>
+          <property name="sortingEnabled">
+           <bool>false</bool>
+          </property>
+          <attribute name="horizontalHeaderStretchLastSection">
+           <bool>true</bool>
+          </attribute>
+          <attribute name="verticalHeaderVisible">
+           <bool>false</bool>
+          </attribute>
+          <column>
+           <property name="text">
+            <string>ID</string>
+           </property>
+          </column>
+          <column>
+           <property name="text">
+            <string>Nom du service</string>
+           </property>
+          </column>
+          <column>
+           <property name="text">
+            <string>Type</string>
+           </property>
+          </column>
+          <column>
+           <property name="text">
+            <string>Prix (DT)</string>
+           </property>
+          </column>
+          <column>
+           <property name="text">
+            <string>Duree (min)</string>
+           </property>
+          </column>
+          <column>
+           <property name="text">
+            <string>Disponible</string>
+           </property>
+          </column>
+         </widget>
+        </item>
+       </layout>
+      </widget>
+      <widget class="QWidget" name="page_rdv">
+       <layout class="QVBoxLayout" name="verticalLayoutRdvRoot">
+        <property name="spacing">
+         <number>14</number>
+        </property>
+        <property name="leftMargin">
+         <number>28</number>
+        </property>
+        <property name="topMargin">
+         <number>24</number>
+        </property>
+        <property name="rightMargin">
+         <number>28</number>
+        </property>
+        <property name="bottomMargin">
+         <number>24</number>
+        </property>
+        <item>
+         <widget class="QLabel" name="labelTitrePageRdv">
+          <property name="text">
+           <string>Gestion des rendez-vous</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <layout class="QHBoxLayout" name="horizontalLayoutFiltresRdv">
+          <property name="spacing">
+           <number>12</number>
+          </property>
+          <item>
+           <widget class="QLineEdit" name="lineEditRechercheRdv">
+            <property name="minimumSize">
+             <size>
+              <width>0</width>
+              <height>38</height>
+             </size>
+            </property>
+            <property name="placeholderText">
+             <string>Rechercher un rendez-vous...</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QComboBox" name="comboBoxFiltreRdv">
+            <property name="minimumSize">
+             <size>
+              <width>190</width>
+              <height>38</height>
+             </size>
+            </property>
+            <item>
+             <property name="text">
+              <string>Statut : Tous</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>Confirme</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>En attente</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>Annule</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>Realise</string>
+             </property>
+            </item>
+           </widget>
+          </item>
+         </layout>
+        </item>
+        <item>
+         <layout class="QHBoxLayout" name="horizontalLayoutBoutonsRdv">
+          <property name="spacing">
+           <number>10</number>
+          </property>
+          <item>
+           <widget class="QPushButton" name="pushButtonAjouterRdv">
+            <property name="minimumSize">
+             <size>
+              <width>110</width>
+              <height>40</height>
+             </size>
+            </property>
+            <property name="cursor">
+             <cursorShape>PointingHandCursor</cursorShape>
+            </property>
+            <property name="text">
+             <string>Ajouter</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPushButton" name="pushButtonModifierRdv">
+            <property name="minimumSize">
+             <size>
+              <width>110</width>
+              <height>40</height>
+             </size>
+            </property>
+            <property name="cursor">
+             <cursorShape>PointingHandCursor</cursorShape>
+            </property>
+            <property name="text">
+             <string>Modifier</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPushButton" name="pushButtonSupprimerRdv">
+            <property name="minimumSize">
+             <size>
+              <width>110</width>
+              <height>40</height>
+             </size>
+            </property>
+            <property name="cursor">
+             <cursorShape>PointingHandCursor</cursorShape>
+            </property>
+            <property name="text">
+             <string>Supprimer</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPushButton" name="pushButtonExporterPdfRdv">
+            <property name="minimumSize">
+             <size>
+              <width>130</width>
+              <height>40</height>
+             </size>
+            </property>
+            <property name="cursor">
+             <cursorShape>PointingHandCursor</cursorShape>
+            </property>
+            <property name="text">
+             <string>Exporter PDF</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPushButton" name="pushButtonStatistiquesRdv">
+            <property name="minimumSize">
+             <size>
+              <width>130</width>
+              <height>40</height>
+             </size>
+            </property>
+            <property name="cursor">
+             <cursorShape>PointingHandCursor</cursorShape>
+            </property>
+            <property name="text">
+             <string>Statistiques</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <spacer name="spacerBoutonsRdv">
+            <property name="orientation">
+             <enum>Qt::Horizontal</enum>
+            </property>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>40</width>
+              <height>20</height>
+             </size>
+            </property>
+           </spacer>
+          </item>
+         </layout>
+        </item>
+        <item>
+         <widget class="QTableWidget" name="tableWidgetRdv">
+          <property name="editTriggers">
+           <set>QAbstractItemView::NoEditTriggers</set>
+          </property>
+          <property name="alternatingRowColors">
+           <bool>true</bool>
+          </property>
+          <property name="selectionMode">
+           <enum>QAbstractItemView::SingleSelection</enum>
+          </property>
+          <property name="selectionBehavior">
+           <enum>QAbstractItemView::SelectRows</enum>
+          </property>
+          <property name="showGrid">
+           <bool>true</bool>
+          </property>
+          <property name="sortingEnabled">
+           <bool>false</bool>
+          </property>
+          <attribute name="horizontalHeaderStretchLastSection">
+           <bool>true</bool>
+          </attribute>
+          <attribute name="verticalHeaderVisible">
+           <bool>false</bool>
+          </attribute>
+          <column>
+           <property name="text">
+            <string>Date</string>
+           </property>
+          </column>
+          <column>
+           <property name="text">
+            <string>Heure</string>
+           </property>
+          </column>
+          <column>
+           <property name="text">
+            <string>Animal</string>
+           </property>
+          </column>
+          <column>
+           <property name="text">
+            <string>Proprietaire</string>
+           </property>
+          </column>
+          <column>
+           <property name="text">
+            <string>Veterinaire</string>
+           </property>
+          </column>
+          <column>
+           <property name="text">
+            <string>Statut</string>
+           </property>
+          </column>
+         </widget>
+        </item>
+       </layout>
+      </widget>
+      <widget class="QWidget" name="page_employes">
+       <layout class="QVBoxLayout" name="verticalLayoutEmployesRoot">
+        <property name="spacing">
+         <number>14</number>
+        </property>
+        <property name="leftMargin">
+         <number>28</number>
+        </property>
+        <property name="topMargin">
+         <number>24</number>
+        </property>
+        <property name="rightMargin">
+         <number>28</number>
+        </property>
+        <property name="bottomMargin">
+         <number>24</number>
+        </property>
+        <item>
+         <widget class="QLabel" name="labelTitrePageEmployes">
+          <property name="text">
+           <string>Gestion des employes</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <layout class="QHBoxLayout" name="horizontalLayoutFiltresEmployes">
+          <property name="spacing">
+           <number>12</number>
+          </property>
+          <item>
+           <widget class="QLineEdit" name="lineEditRechercheEmployes">
+            <property name="minimumSize">
+             <size>
+              <width>0</width>
+              <height>38</height>
+             </size>
+            </property>
+            <property name="placeholderText">
+             <string>Rechercher un employe...</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QComboBox" name="comboBoxFiltreEmployes">
+            <property name="minimumSize">
+             <size>
+              <width>190</width>
+              <height>38</height>
+             </size>
+            </property>
+            <item>
+             <property name="text">
+              <string>Poste : Tous</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>Veterinaire</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>Secretaire</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>Gestionnaire de stock</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>Comptable</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>Administrateur</string>
+             </property>
+            </item>
+           </widget>
+          </item>
+         </layout>
+        </item>
+        <item>
+         <layout class="QHBoxLayout" name="horizontalLayoutBoutonsEmployes">
+          <property name="spacing">
+           <number>10</number>
+          </property>
+          <item>
+           <widget class="QPushButton" name="pushButtonAjouterEmployes">
+            <property name="minimumSize">
+             <size>
+              <width>110</width>
+              <height>40</height>
+             </size>
+            </property>
+            <property name="cursor">
+             <cursorShape>PointingHandCursor</cursorShape>
+            </property>
+            <property name="text">
+             <string>Ajouter</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPushButton" name="pushButtonModifierEmployes">
+            <property name="minimumSize">
+             <size>
+              <width>110</width>
+              <height>40</height>
+             </size>
+            </property>
+            <property name="cursor">
+             <cursorShape>PointingHandCursor</cursorShape>
+            </property>
+            <property name="text">
+             <string>Modifier</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPushButton" name="pushButtonSupprimerEmployes">
+            <property name="minimumSize">
+             <size>
+              <width>110</width>
+              <height>40</height>
+             </size>
+            </property>
+            <property name="cursor">
+             <cursorShape>PointingHandCursor</cursorShape>
+            </property>
+            <property name="text">
+             <string>Supprimer</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPushButton" name="pushButtonExporterPdfEmployes">
+            <property name="minimumSize">
+             <size>
+              <width>130</width>
+              <height>40</height>
+             </size>
+            </property>
+            <property name="cursor">
+             <cursorShape>PointingHandCursor</cursorShape>
+            </property>
+            <property name="text">
+             <string>Exporter PDF</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPushButton" name="pushButtonStatistiquesEmployes">
+            <property name="minimumSize">
+             <size>
+              <width>130</width>
+              <height>40</height>
+             </size>
+            </property>
+            <property name="cursor">
+             <cursorShape>PointingHandCursor</cursorShape>
+            </property>
+            <property name="text">
+             <string>Statistiques</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <spacer name="spacerBoutonsEmployes">
+            <property name="orientation">
+             <enum>Qt::Horizontal</enum>
+            </property>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>40</width>
+              <height>20</height>
+             </size>
+            </property>
+           </spacer>
+          </item>
+         </layout>
+        </item>
+        <item>
+         <widget class="QTableWidget" name="tableWidgetEmployes">
+          <property name="editTriggers">
+           <set>QAbstractItemView::NoEditTriggers</set>
+          </property>
+          <property name="alternatingRowColors">
+           <bool>true</bool>
+          </property>
+          <property name="selectionMode">
+           <enum>QAbstractItemView::SingleSelection</enum>
+          </property>
+          <property name="selectionBehavior">
+           <enum>QAbstractItemView::SelectRows</enum>
+          </property>
+          <property name="showGrid">
+           <bool>true</bool>
+          </property>
+          <property name="sortingEnabled">
+           <bool>false</bool>
+          </property>
+          <attribute name="horizontalHeaderStretchLastSection">
+           <bool>true</bool>
+          </attribute>
+          <attribute name="verticalHeaderVisible">
+           <bool>false</bool>
+          </attribute>
+          <column>
+           <property name="text">
+            <string>ID</string>
+           </property>
+          </column>
+          <column>
+           <property name="text">
+            <string>Nom</string>
+           </property>
+          </column>
+          <column>
+           <property name="text">
+            <string>Prenom</string>
+           </property>
+          </column>
+          <column>
+           <property name="text">
+            <string>Poste</string>
+           </property>
+          </column>
+          <column>
+           <property name="text">
+            <string>Telephone</string>
+           </property>
+          </column>
+          <column>
+           <property name="text">
+            <string>Email</string>
+           </property>
+          </column>
+          <column>
+           <property name="text">
+            <string>Statut</string>
+           </property>
+          </column>
+         </widget>
+        </item>
+       </layout>
+      </widget>
+      <widget class="QWidget" name="page_stock">
+       <layout class="QVBoxLayout" name="verticalLayoutStockRoot">
+        <property name="spacing">
+         <number>14</number>
+        </property>
+        <property name="leftMargin">
+         <number>28</number>
+        </property>
+        <property name="topMargin">
+         <number>24</number>
+        </property>
+        <property name="rightMargin">
+         <number>28</number>
+        </property>
+        <property name="bottomMargin">
+         <number>24</number>
+        </property>
+        <item>
+         <widget class="QLabel" name="labelTitrePageStock">
+          <property name="text">
+           <string>Gestion du stock</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <layout class="QHBoxLayout" name="horizontalLayoutFiltresStock">
+          <property name="spacing">
+           <number>12</number>
+          </property>
+          <item>
+           <widget class="QLineEdit" name="lineEditRechercheStock">
+            <property name="minimumSize">
+             <size>
+              <width>0</width>
+              <height>38</height>
+             </size>
+            </property>
+            <property name="placeholderText">
+             <string>Rechercher un produit...</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QComboBox" name="comboBoxFiltreStock">
+            <property name="minimumSize">
+             <size>
+              <width>190</width>
+              <height>38</height>
+             </size>
+            </property>
+            <item>
+             <property name="text">
+              <string>Categorie : Toutes</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>Medicament</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>Vaccin</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>Materiel</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>Alimentation</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>Autre</string>
+             </property>
+            </item>
+           </widget>
+          </item>
+         </layout>
+        </item>
+        <item>
+         <layout class="QHBoxLayout" name="horizontalLayoutBoutonsStock">
+          <property name="spacing">
+           <number>10</number>
+          </property>
+          <item>
+           <widget class="QPushButton" name="pushButtonAjouterStock">
+            <property name="minimumSize">
+             <size>
+              <width>110</width>
+              <height>40</height>
+             </size>
+            </property>
+            <property name="cursor">
+             <cursorShape>PointingHandCursor</cursorShape>
+            </property>
+            <property name="text">
+             <string>Ajouter</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPushButton" name="pushButtonModifierStock">
+            <property name="minimumSize">
+             <size>
+              <width>110</width>
+              <height>40</height>
+             </size>
+            </property>
+            <property name="cursor">
+             <cursorShape>PointingHandCursor</cursorShape>
+            </property>
+            <property name="text">
+             <string>Modifier</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPushButton" name="pushButtonSupprimerStock">
+            <property name="minimumSize">
+             <size>
+              <width>110</width>
+              <height>40</height>
+             </size>
+            </property>
+            <property name="cursor">
+             <cursorShape>PointingHandCursor</cursorShape>
+            </property>
+            <property name="text">
+             <string>Supprimer</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPushButton" name="pushButtonExporterPdfStock">
+            <property name="minimumSize">
+             <size>
+              <width>130</width>
+              <height>40</height>
+             </size>
+            </property>
+            <property name="cursor">
+             <cursorShape>PointingHandCursor</cursorShape>
+            </property>
+            <property name="text">
+             <string>Exporter PDF</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPushButton" name="pushButtonStatistiquesStock">
+            <property name="minimumSize">
+             <size>
+              <width>130</width>
+              <height>40</height>
+             </size>
+            </property>
+            <property name="cursor">
+             <cursorShape>PointingHandCursor</cursorShape>
+            </property>
+            <property name="text">
+             <string>Statistiques</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <spacer name="spacerBoutonsStock">
+            <property name="orientation">
+             <enum>Qt::Horizontal</enum>
+            </property>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>40</width>
+              <height>20</height>
+             </size>
+            </property>
+           </spacer>
+          </item>
+         </layout>
+        </item>
+        <item>
+         <widget class="QTableWidget" name="tableWidgetStock">
+          <property name="editTriggers">
+           <set>QAbstractItemView::NoEditTriggers</set>
+          </property>
+          <property name="alternatingRowColors">
+           <bool>true</bool>
+          </property>
+          <property name="selectionMode">
+           <enum>QAbstractItemView::SingleSelection</enum>
+          </property>
+          <property name="selectionBehavior">
+           <enum>QAbstractItemView::SelectRows</enum>
+          </property>
+          <property name="showGrid">
+           <bool>true</bool>
+          </property>
+          <property name="sortingEnabled">
+           <bool>false</bool>
+          </property>
+          <attribute name="horizontalHeaderStretchLastSection">
+           <bool>true</bool>
+          </attribute>
+          <attribute name="verticalHeaderVisible">
+           <bool>false</bool>
+          </attribute>
+          <column>
+           <property name="text">
+            <string>ID</string>
+           </property>
+          </column>
+          <column>
+           <property name="text">
+            <string>Produit</string>
+           </property>
+          </column>
+          <column>
+           <property name="text">
+            <string>Categorie</string>
+           </property>
+          </column>
+          <column>
+           <property name="text">
+            <string>Quantite</string>
+           </property>
+          </column>
+          <column>
+           <property name="text">
+            <string>Seuil alerte</string>
+           </property>
+          </column>
+          <column>
+           <property name="text">
+            <string>Date expiration</string>
+           </property>
+          </column>
+          <column>
+           <property name="text">
+            <string>Statut</string>
+           </property>
+          </column>
+         </widget>
+        </item>
+       </layout>
+      </widget>
+     </widget>
+    </item>
+   </layout>
+  </widget>
+  <widget class="QStatusBar" name="statusbar" />
+ </widget>
+ <resources />
+ <connections />
+</ui>
