@@ -3,11 +3,16 @@
 
 #include <QMainWindow>
 
+#include "donnees.h"
+
 QT_BEGIN_NAMESPACE
 namespace Ui { class GSmartPetCare; }
 QT_END_NAMESPACE
 
 class GestionServices;
+class GestionRdv;
+class GestionEmployes;
+class GestionAnimaux;
 
 class GSmartPetCare : public QMainWindow
 {
@@ -17,24 +22,34 @@ public:
     explicit GSmartPetCare(QWidget *parent = nullptr);
     ~GSmartPetCare();
 
+protected:
+    bool eventFilter(QObject *watched, QEvent *event) override;
+
 private slots:
-    // Clic sur le bouton « Se connecter » (connexion automatique par le nom du slot)
     void on_pushButtonConnexion_clicked();
 
 private:
     Ui::GSmartPetCare *ui;
 
-    // Indices des pages du QStackedWidget
     enum Page { PageLogin = 0, PageAccueil = 1 };
 
-    // Pages de la zone de contenu (QStackedWidget « stackContenu » du .ui)
-    enum Contenu { ContenuAccueil = 0, ContenuServices = 1 };
+    enum Contenu {
+        ContenuAccueil = 0,
+        ContenuServices = 1,
+        ContenuRdv = 2,
+        ContenuEmployes = 3,
+        ContenuAnimaux = 4
+    };
 
-    // Affiche une page du contenu et met en surbrillance le bouton du menu correspondant
     void afficherContenu(int index);
+    void preparerCartesAccueil();
+    void appliquerSession(const Employe *u);
 
-    // Logique de la page « Gestion des services » (widgets définis dans le .ui)
     GestionServices *gestionServices = nullptr;
+    GestionRdv *gestionRdv = nullptr;
+    GestionEmployes *gestionEmployes = nullptr;
+    GestionAnimaux *gestionAnimaux = nullptr;
+    BaseEmployes m_baseEmployes;
 };
 
 #endif // GSMARTPETCARE_H

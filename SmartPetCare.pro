@@ -10,18 +10,30 @@ SOURCES += \
     main.cpp \
     gsmartpetcare.cpp \
     gestionservices.cpp \
+    gestionrdv.cpp \
+    gestionemployes.cpp \
+    gestionanimaux.cpp \
+    statistiquesdialog.cpp \
     historiqueservices.cpp \
     statistiquesservices.cpp \
+    statistiquesemployes.cpp \
     donutchart.cpp \
-    barchart.cpp
+    barchart.cpp \
+    linechart.cpp
 
 HEADERS += \
     gsmartpetcare.h \
     gestionservices.h \
+    gestionrdv.h \
+    gestionemployes.h \
+    gestionanimaux.h \
+    statistiquesdialog.h \
     historiqueservices.h \
     statistiquesservices.h \
+    statistiquesemployes.h \
     donutchart.h \
     barchart.h \
+    linechart.h \
     donnees.h
 
 FORMS += \

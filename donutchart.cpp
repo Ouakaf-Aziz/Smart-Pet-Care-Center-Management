@@ -18,6 +18,12 @@ void DonutChart::setData(const QMap<QString, int> &data)
     update();
 }
 
+void DonutChart::setUnite(const QString &unite)
+{
+    m_unite = unite;
+    update();
+}
+
 void DonutChart::clear()
 {
     m_data.clear();
@@ -75,7 +81,7 @@ void DonutChart::paintEvent(QPaintEvent *)
     p.setFont(f);
     p.setPen(QColor("#6B7A78"));
     p.drawText(QRectF(0, side * 0.52, side, side * 0.15), Qt::AlignCenter,
-               QStringLiteral("services"));
+               m_unite);
 
     // --- Légende ---
     f.setPointSize(9);
