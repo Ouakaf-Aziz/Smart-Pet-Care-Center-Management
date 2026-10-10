@@ -1,7 +1,0 @@
-build/
- .qtcreator/
-*.pro.user
-build-*/
-*.pro.user
-*.pro.user.*
- 
