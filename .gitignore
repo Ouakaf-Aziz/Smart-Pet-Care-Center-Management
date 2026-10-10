@@ -1,0 +1,13 @@
+# Fichiers de compilation Qt
+build/
+**/build/
+debug/
+release/
+*.o
+*.obj
+*.exe
+
+# Configuration personnelle Qt Creator
+.qtcreator/
+*.pro.user
+*.pro.user.*
