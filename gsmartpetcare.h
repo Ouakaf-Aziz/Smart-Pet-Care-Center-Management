@@ -8,6 +8,7 @@ namespace Ui { class GSmartPetCare; }
 QT_END_NAMESPACE
 
 class GestionServices;
+class GestionRdv;
 
 class GSmartPetCare : public QMainWindow
 {
@@ -28,13 +29,16 @@ private:
     enum Page { PageLogin = 0, PageAccueil = 1 };
 
     // Pages de la zone de contenu (QStackedWidget « stackContenu » du .ui)
-    enum Contenu { ContenuAccueil = 0, ContenuServices = 1 };
+    enum Contenu { ContenuAccueil = 0, ContenuServices = 1, ContenuRDV = 2 };
 
     // Affiche une page du contenu et met en surbrillance le bouton du menu correspondant
     void afficherContenu(int index);
 
     // Logique de la page « Gestion des services » (widgets définis dans le .ui)
     GestionServices *gestionServices = nullptr;
+
+    // Logique de la page « Gestion des rendez-vous » (widgets définis dans le même .ui)
+    GestionRdv *gestionRdv = nullptr;
 };
 
 #endif // GSMARTPETCARE_H

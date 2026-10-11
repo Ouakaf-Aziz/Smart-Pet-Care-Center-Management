@@ -96,7 +96,7 @@ QLineEdit:focus {
     border: none;
     border-left: 4px solid transparent;
 }
-#btnNavAccueil[actif="true"], #btnNavServices[actif="true"] {
+#btnNavAccueil[actif="true"], #btnNavServices[actif="true"], #btnNavRDV[actif="true"] {
     background-color: #0B5B55;
     color: #FFFFFF;
     border-left: 4px solid #F28C28;
@@ -1916,6 +1916,223 @@ QLineEdit:focus {
           </layout>
          </widget>
              </widget>
+             <widget class="QScrollArea" name="scrollRDV"><property name="frameShape"><enum>QFrame::Shape::NoFrame</enum></property><property name="widgetResizable"><bool>true</bool></property><widget class="QWidget" name="pageRDV"><property name="minimumSize"><size><width>1100</width><height>0</height></size></property><property name="styleSheet"><string notr="true">QWidget {
+            font-family: "Arial";
+            font-size: 11pt;
+            color: #1F2A37;
+        }
+        #pageRDV {
+            background-color: #F4F8F7;
+        }
+        #labelTitrePageRdv {
+            font-size: 20pt;
+            font-weight: bold;
+            color: #0B4F4A;
+        }
+        QLineEdit, QComboBox, QPlainTextEdit, QDateEdit, QTimeEdit, QSpinBox {
+            background-color: #FFFFFF;
+            border: 1px solid #CBD5D3;
+            border-radius: 6px;
+            padding: 5px 8px;
+        }
+        QLineEdit:focus, QComboBox:focus, QPlainTextEdit:focus, QDateEdit:focus, QTimeEdit:focus, QSpinBox:focus {
+            border: 2px solid #0F766E;
+        }
+        QLineEdit:read-only {
+            background-color: #EAF2F1;
+            color: #5C6B69;
+        }
+        QComboBox::drop-down {
+            border: none;
+            width: 24px;
+        }
+        QComboBox QAbstractItemView {
+            background-color: #FFFFFF;
+            border: 1px solid #CBD5D3;
+            selection-background-color: #CDEAE6;
+            selection-color: #1F2A37;
+            outline: none;
+        }
+        QCheckBox {
+            spacing: 8px;
+        }
+        QCheckBox::indicator {
+            width: 18px;
+            height: 18px;
+            border: 1px solid #CBD5D3;
+            border-radius: 4px;
+            background-color: #FFFFFF;
+        }
+        QCheckBox::indicator:checked {
+            background-color: #0F766E;
+            border: 1px solid #0F766E;
+        }
+        QScrollBar:vertical {
+            background: #F4F8F7;
+            width: 10px;
+            margin: 2px;
+        }
+        QScrollBar::handle:vertical {
+            background: #CBD5D3;
+            border-radius: 5px;
+            min-height: 24px;
+        }
+        QScrollBar::handle:vertical:hover {
+            background: #9AA6A4;
+        }
+        QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical {
+            height: 0px;
+        }
+        #btnModifierLigne {
+            background-color: #2F6FB3;
+            color: #FFFFFF;
+            font-size: 10pt;
+            font-weight: bold;
+            border: none;
+            border-radius: 6px;
+            padding: 0 12px;
+        }
+        #btnModifierLigne:hover { background-color: #255A93; }
+        #btnSupprimerLigne {
+            background-color: #C0392B;
+            color: #FFFFFF;
+            font-size: 10pt;
+            font-weight: bold;
+            border: none;
+            border-radius: 6px;
+            padding: 0 12px;
+        }
+        #btnSupprimerLigne:hover { background-color: #A5311F; }
+        #pushButtonStatistiquesRdv {
+            background-color: #F28C28;
+            color: #FFFFFF;
+            font-weight: bold;
+            border: none;
+            border-radius: 6px;
+        }
+        #pushButtonStatistiquesRdv:hover { background-color: #E07B16; }
+        #pushButtonExporterPdfRdv {
+            background-color: #0B4F4A;
+            color: #FFFFFF;
+            font-weight: bold;
+            border: none;
+            border-radius: 6px;
+        }
+        #pushButtonExporterPdfRdv:hover { background-color: #083E3A; }
+        #pushButtonEnregistrerRdv {
+            background-color: #0F766E;
+            color: #FFFFFF;
+            font-size: 11pt;
+            font-weight: bold;
+            border: none;
+            border-radius: 6px;
+        }
+        #pushButtonEnregistrerRdv:hover { background-color: #0C5F58; }
+        #pushButtonAnnulerRdv {
+            background-color: #C0392B;
+            color: #FFFFFF;
+            font-size: 11pt;
+            font-weight: bold;
+            border: none;
+            border-radius: 6px;
+        }
+        #pushButtonAnnulerRdv:hover { background-color: #A5311F; }
+        #pushButtonCalendrierRdv {
+            background-color: #0F766E;
+            color: #FFFFFF;
+            font-weight: bold;
+            border: none;
+            border-radius: 6px;
+        }
+        #pushButtonCalendrierRdv:hover { background-color: #0C5F58; }
+        #frameDetailRdv {
+            background-color: #FFFFFF;
+            border: 1px solid #CBD5D3;
+            border-radius: 12px;
+        }
+        #labelDetailTitreRdv {
+            font-size: 13pt;
+            font-weight: bold;
+            color: #0B4F4A;
+        }
+        #labelChampIdRdv, #labelChampDateRdv, #labelChampHeureRdv, #labelChampTypeRdv, #labelChampDureeRdv, #labelChampPrioriteRdv, #labelChampSalleRdv, #labelChampStatutRdv {
+            font-size: 9pt;
+            font-weight: bold;
+            color: #6B7A78;
+        }
+        QTableWidget {
+            background-color: #FFFFFF;
+            border: 1px solid #CBD5D3;
+            border-radius: 8px;
+            gridline-color: #E3EAE9;
+        }
+        QHeaderView::section {
+            background-color: #0F766E;
+            color: #FFFFFF;
+            font-weight: bold;
+            padding: 6px 4px;
+            border: none;
+        }
+        QTableWidget::item {
+            padding: 4px;
+        }
+        QTableWidget::item:selected {
+            background-color: #CDEAE6;
+            color: #1F2A37;
+        }
+        #pushButtonConfirmerRdv {
+            background-color: #F28C28;
+            color: #FFFFFF;
+            font-weight: bold;
+            border: none;
+            border-radius: 6px;
+        }
+        #pushButtonConfirmerRdv:hover { background-color: #E07B16; }
+        #labelChampIdRdv, #labelChampDateRdv, #labelChampHeureRdv, #labelChampTypeRdv,
+        #labelChampDureeRdv, #labelChampPrioriteRdv, #labelChampSalleRdv, #labelChampStatutRdv {
+            padding-top: 8px;
+        }
+        QDateEdit::drop-down {
+            border: none;
+            width: 24px;
+        }
+        QDateEdit::down-arrow, QComboBox::down-arrow {
+            image: url(:/images/arrow_down.png);
+            width: 9px;
+            height: 6px;
+        }
+        QSpinBox, QTimeEdit {
+            padding-right: 22px;
+        }
+        QSpinBox::up-button, QTimeEdit::up-button {
+            subcontrol-origin: border;
+            subcontrol-position: top right;
+            width: 20px;
+            border: none;
+        }
+        QSpinBox::down-button, QTimeEdit::down-button {
+            subcontrol-origin: border;
+            subcontrol-position: bottom right;
+            width: 20px;
+            border: none;
+        }
+        QSpinBox::up-arrow, QTimeEdit::up-arrow {
+            image: url(:/images/arrow_up.png);
+            width: 9px;
+            height: 6px;
+        }
+        QSpinBox::down-arrow, QTimeEdit::down-arrow {
+            image: url(:/images/arrow_down.png);
+            width: 9px;
+            height: 6px;
+        }
+        #tableWidgetRdv {
+            font-size: 10pt;
+        }
+        #tableWidgetRdv #btnModifierLigne, #tableWidgetRdv #btnSupprimerLigne {
+            font-size: 9pt;
+            padding: 0 6px;
+        }</string></property><layout class="QVBoxLayout" name="verticalLayoutRootRdv"><property name="spacing"><number>14</number></property><property name="leftMargin"><number>24</number></property><property name="topMargin"><number>24</number></property><property name="rightMargin"><number>24</number></property><property name="bottomMargin"><number>24</number></property><item><layout class="QHBoxLayout" name="horizontalLayoutEnteteRdv"><property name="spacing"><number>18</number></property><item><widget class="QLabel" name="labelTitrePageRdv"><property name="text"><string>Gestion des rendez-vous</string></property></widget></item><item><spacer name="spacerEnteteRdv"><property name="orientation"><enum>Qt::Orientation::Horizontal</enum></property><property name="sizeHint" stdset="0"><size><width>40</width><height>20</height></size></property></spacer></item></layout></item><item><layout class="QHBoxLayout" name="horizontalLayoutFiltresRdv"><property name="spacing"><number>10</number></property><item><widget class="QLineEdit" name="lineEditRechercheRdv"><property name="minimumSize"><size><width>0</width><height>36</height></size></property><property name="placeholderText"><string>Rechercher un rendez-vous...</string></property><property name="clearButtonEnabled"><bool>true</bool></property></widget></item><item><widget class="QComboBox" name="comboBoxTriRdv"><property name="minimumSize"><size><width>0</width><height>36</height></size></property><item><property name="text"><string>Trier par : Date</string></property></item><item><property name="text"><string>Trier par : Heure</string></property></item></widget></item><item><widget class="QComboBox" name="comboBoxFiltreStatutRdv"><property name="minimumSize"><size><width>0</width><height>36</height></size></property><item><property name="text"><string>Statut : Tous</string></property></item><item><property name="text"><string>Statut : confirmé</string></property></item><item><property name="text"><string>Statut : annulé</string></property></item></widget></item></layout></item><item><layout class="QHBoxLayout" name="horizontalLayoutBoutonsRdv"><property name="spacing"><number>10</number></property><item><widget class="QPushButton" name="pushButtonExporterPdfRdv"><property name="minimumSize"><size><width>130</width><height>36</height></size></property><property name="cursor"><cursorShape>PointingHandCursor</cursorShape></property><property name="text"><string>Exporter PDF</string></property></widget></item><item><widget class="QPushButton" name="pushButtonStatistiquesRdv"><property name="minimumSize"><size><width>130</width><height>36</height></size></property><property name="cursor"><cursorShape>PointingHandCursor</cursorShape></property><property name="text"><string>Statistiques</string></property></widget></item><item><widget class="QPushButton" name="pushButtonConfirmerRdv"><property name="minimumSize"><size><width>140</width><height>36</height></size></property><property name="cursor"><cursorShape>PointingHandCursor</cursorShape></property><property name="text"><string>Confirmer RDV</string></property></widget></item><item><widget class="QPushButton" name="pushButtonCalendrierRdv"><property name="minimumSize"><size><width>180</width><height>36</height></size></property><property name="cursor"><cursorShape>PointingHandCursor</cursorShape></property><property name="text"><string>Calendrier intelligent</string></property></widget></item><item><spacer name="spacerBoutonsRdv"><property name="orientation"><enum>Qt::Orientation::Horizontal</enum></property><property name="sizeHint" stdset="0"><size><width>40</width><height>20</height></size></property></spacer></item></layout></item><item><layout class="QHBoxLayout" name="horizontalLayoutContenuRdv"><property name="spacing"><number>14</number></property><item><widget class="QTableWidget" name="tableWidgetRdv"><property name="editTriggers"><set>QAbstractItemView::EditTrigger::NoEditTriggers</set></property><property name="alternatingRowColors"><bool>true</bool></property><property name="selectionMode"><enum>QAbstractItemView::SelectionMode::SingleSelection</enum></property><property name="selectionBehavior"><enum>QAbstractItemView::SelectionBehavior::SelectRows</enum></property><property name="showGrid"><bool>true</bool></property><property name="sortingEnabled"><bool>false</bool></property><attribute name="horizontalHeaderDefaultSectionSize"><number>100</number></attribute><attribute name="horizontalHeaderMinimumSectionSize"><number>40</number></attribute><attribute name="horizontalHeaderStretchLastSection"><bool>false</bool></attribute><attribute name="verticalHeaderDefaultSectionSize"><number>46</number></attribute><attribute name="verticalHeaderVisible"><bool>false</bool></attribute><column><property name="text"><string>Id</string></property></column><column><property name="text"><string>Statut</string></property></column><column><property name="text"><string>Priorité</string></property></column><column><property name="text"><string>Durée</string></property></column><column><property name="text"><string>Type</string></property></column><column><property name="text"><string>Salle</string></property></column><column><property name="text"><string>Heure</string></property></column><column><property name="text"><string>Date</string></property></column><column><property name="text"><string>Actions</string></property></column></widget></item><item><widget class="QFrame" name="frameDetailRdv"><property name="minimumSize"><size><width>320</width><height>0</height></size></property><property name="maximumSize"><size><width>340</width><height>16777215</height></size></property><layout class="QVBoxLayout" name="verticalLayoutDetailRdv" stretch="0,0,1,0"><property name="spacing"><number>8</number></property><property name="leftMargin"><number>18</number></property><property name="topMargin"><number>18</number></property><property name="rightMargin"><number>18</number></property><property name="bottomMargin"><number>18</number></property><item><widget class="QLabel" name="labelDetailTitreRdv"><property name="text"><string>Ajouter un rendez-vous</string></property></widget></item><item><layout class="QGridLayout" name="gridLayoutFormRdv"><property name="horizontalSpacing"><number>10</number></property><property name="verticalSpacing"><number>4</number></property><item row="0" column="0" colspan="2"><widget class="QLabel" name="labelChampIdRdv"><property name="text"><string>ID RDV</string></property></widget></item><item row="1" column="0" colspan="2"><widget class="QLineEdit" name="lineEditIdRdv"><property name="minimumSize"><size><width>0</width><height>34</height></size></property><property name="placeholderText"><string>ex. RDV008</string></property></widget></item><item row="2" column="0"><widget class="QLabel" name="labelChampDateRdv"><property name="text"><string>DATE</string></property></widget></item><item row="2" column="1"><widget class="QLabel" name="labelChampHeureRdv"><property name="text"><string>HEURE</string></property></widget></item><item row="3" column="0"><widget class="QDateEdit" name="dateEditRdv"><property name="minimumSize"><size><width>0</width><height>34</height></size></property><property name="calendarPopup"><bool>true</bool></property><property name="displayFormat"><string>dd/MM/yyyy</string></property></widget></item><item row="3" column="1"><widget class="QTimeEdit" name="timeEditRdv"><property name="minimumSize"><size><width>0</width><height>34</height></size></property><property name="displayFormat"><string>HH:mm</string></property></widget></item><item row="4" column="0"><widget class="QLabel" name="labelChampTypeRdv"><property name="text"><string>TYPE</string></property></widget></item><item row="4" column="1"><widget class="QLabel" name="labelChampDureeRdv"><property name="text"><string>DURÉE (MIN)</string></property></widget></item><item row="5" column="0"><widget class="QComboBox" name="comboBoxTypeRdv"><property name="minimumSize"><size><width>0</width><height>34</height></size></property><item><property name="text"><string>vaccination</string></property></item><item><property name="text"><string>toilettage</string></property></item><item><property name="text"><string>controle</string></property></item><item><property name="text"><string>consultation</string></property></item></widget></item><item row="5" column="1"><widget class="QSpinBox" name="spinBoxDureeRdv"><property name="minimumSize"><size><width>0</width><height>34</height></size></property><property name="maximum"><number>600</number></property></widget></item><item row="6" column="0"><widget class="QLabel" name="labelChampPrioriteRdv"><property name="text"><string>PRIORITÉ</string></property></widget></item><item row="6" column="1"><widget class="QLabel" name="labelChampSalleRdv"><property name="text"><string>SALLE</string></property></widget></item><item row="7" column="0"><widget class="QComboBox" name="comboBoxPrioriteRdv"><property name="minimumSize"><size><width>0</width><height>34</height></size></property><item><property name="text"><string>urgent</string></property></item><item><property name="text"><string>trés urgent</string></property></item><item><property name="text"><string></string></property></item></widget></item><item row="7" column="1"><widget class="QComboBox" name="comboBoxSalleRdv"><property name="minimumSize"><size><width>0</width><height>34</height></size></property><item><property name="text"><string>1</string></property></item><item><property name="text"><string>2</string></property></item></widget></item><item row="8" column="0" colspan="2"><widget class="QLabel" name="labelChampStatutRdv"><property name="text"><string>STATUT</string></property></widget></item><item row="9" column="0" colspan="2"><widget class="QComboBox" name="comboBoxStatutRdv"><property name="minimumSize"><size><width>0</width><height>34</height></size></property><item><property name="text"><string>confirmé</string></property></item><item><property name="text"><string>annulé</string></property></item></widget></item><item row="10" column="0" colspan="2"><widget class="QCheckBox" name="checkBoxEmailRdv"><property name="text"><string>Confirmation automatique par e-mail</string></property></widget></item></layout></item><item><spacer name="spacerDetailRdv"><property name="orientation"><enum>Qt::Orientation::Vertical</enum></property><property name="sizeHint" stdset="0"><size><width>20</width><height>20</height></size></property></spacer></item><item><layout class="QHBoxLayout" name="horizontalLayoutActionsRdv"><property name="spacing"><number>10</number></property><item><widget class="QPushButton" name="pushButtonEnregistrerRdv"><property name="minimumSize"><size><width>0</width><height>42</height></size></property><property name="cursor"><cursorShape>PointingHandCursor</cursorShape></property><property name="text"><string>Enregistrer</string></property></widget></item><item><widget class="QPushButton" name="pushButtonAnnulerRdv"><property name="minimumSize"><size><width>0</width><height>42</height></size></property><property name="cursor"><cursorShape>PointingHandCursor</cursorShape></property><property name="text"><string>Annuler</string></property></widget></item></layout></item></layout></widget></item></layout></item></layout></widget></widget>
            </widget>
           </item>
          </layout>

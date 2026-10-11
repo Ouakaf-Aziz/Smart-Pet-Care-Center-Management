@@ -1,6 +1,7 @@
 #include "gsmartpetcare.h"
 #include "ui_gsmartpetcare.h"
 #include "gestionservices.h"
+#include "gestionrdv.h"
 
 #include <QGraphicsDropShadowEffect>
 #include <QIcon>
@@ -37,6 +38,9 @@ GSmartPetCare::GSmartPetCare(QWidget *parent)
     // GestionServices se charge de leur comportement.
     gestionServices = new GestionServices(ui, this, this);
 
+    // Page « Gestion des rendez-vous » : même principe (pageRDV dans ce même .ui).
+    gestionRdv = new GestionRdv(ui, this, this);
+
     // Navigation depuis le menu latéral (toujours visible : seule la zone de contenu change)
     afficherContenu(ContenuAccueil);
     connect(ui->btnNavAccueil, &QPushButton::clicked, this, [this]() {
@@ -44,6 +48,9 @@ GSmartPetCare::GSmartPetCare(QWidget *parent)
     });
     connect(ui->btnNavServices, &QPushButton::clicked, this, [this]() {
         afficherContenu(ContenuServices);
+    });
+    connect(ui->btnNavRDV, &QPushButton::clicked, this, [this]() {
+        afficherContenu(ContenuRDV);
     });
 
     // Déconnexion : retour à la page de connexion
@@ -62,6 +69,7 @@ void GSmartPetCare::afficherContenu(int index)
     const struct { QPushButton *bouton; int page; } liens[] = {
         { ui->btnNavAccueil,  ContenuAccueil },
         { ui->btnNavServices, ContenuServices },
+        { ui->btnNavRDV,      ContenuRDV },
     };
     for (const auto &l : liens) {
         l.bouton->setProperty("actif", l.page == index);
