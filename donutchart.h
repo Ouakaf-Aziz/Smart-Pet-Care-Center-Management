@@ -17,6 +17,7 @@ public:
     // ex. { {"Consultation", 5}, {"Vaccination", 3} }
     void setData(const QMap<QString, int> &data);
     void clear();
+    void setUnite(const QString &unite);   // texte sous le total (par défaut « services », « employés » pour les employés)
 
     QSize minimumSizeHint() const override;
 
@@ -26,6 +27,7 @@ protected:
 private:
     QMap<QString, int> m_data;
     QVector<QColor> m_colors;
+    QString m_unite = QStringLiteral("services");
 };
 
 #endif // DONUTCHART_H

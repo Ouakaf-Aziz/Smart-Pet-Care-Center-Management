@@ -429,8 +429,8 @@ void styliserBoutonsOkAnnuler(QDialogButtonBox *box)
     an->setMinimumSize(110, 36);
     ok->setStyleSheet("QPushButton { background-color: #0F766E; color: #FFFFFF; font-weight: bold; border: none; border-radius: 6px; }"
                       "QPushButton:hover { background-color: #0C5F58; }");
-    an->setStyleSheet("QPushButton { background-color: #9AA6A4; color: #FFFFFF; font-weight: bold; border: none; border-radius: 6px; }"
-                      "QPushButton:hover { background-color: #808C8A; }");
+    an->setStyleSheet("QPushButton { background-color: #C0392B; color: #FFFFFF; font-weight: bold; border: none; border-radius: 6px; }"
+                      "QPushButton:hover { background-color: #A5311F; }");
 }
 } // namespace
 
