@@ -96,11 +96,7 @@ QLineEdit:focus {
     border: none;
     border-left: 4px solid transparent;
 }
-<<<<<<< Updated upstream
-#btnNavAccueil[actif="true"], #btnNavServices[actif="true"] {
-=======
 #btnNavAccueil[actif="true"], #btnNavServices[actif="true"], #btnNavEmployes[actif="true"], #btnNavRDV[actif="true"] {
->>>>>>> Stashed changes
     background-color: #0B5B55;
     color: #FFFFFF;
     border-left: 4px solid #F28C28;
@@ -300,7 +296,7 @@ QLineEdit:focus {
              <item>
               <widget class="QLabel" name="labelIdentifiant">
                <property name="text">
-                <string>Email (employé)</string>
+                <string>Identifiant</string>
                </property>
               </widget>
              </item>
@@ -313,7 +309,7 @@ QLineEdit:focus {
                 </size>
                </property>
                <property name="placeholderText">
-                <string>prenom.nom@petnova.tn</string>
+                <string>Saisissez votre identifiant</string>
                </property>
               </widget>
              </item>
@@ -385,22 +381,6 @@ QLineEdit:focus {
                </property>
                <property name="text">
                 <string>Se connecter</string>
-               </property>
-              </widget>
-             </item>
-             <item>
-              <widget class="QPushButton" name="pushButtonVisageConnexion">
-               <property name="minimumSize">
-                <size>
-                 <width>0</width>
-                 <height>44</height>
-                </size>
-               </property>
-               <property name="cursor">
-                <cursorShape>PointingHandCursor</cursorShape>
-               </property>
-               <property name="text">
-                <string>Reconnaissance faciale</string>
                </property>
               </widget>
              </item>
@@ -1967,8 +1947,6 @@ QLineEdit:focus {
           </layout>
          </widget>
              </widget>
-<<<<<<< Updated upstream
-=======
              <widget class="QScrollArea" name="scrollRDV"><property name="frameShape"><enum>QFrame::Shape::NoFrame</enum></property><property name="widgetResizable"><bool>true</bool></property><widget class="QWidget" name="pageRDV"><property name="minimumSize"><size><width>1100</width><height>0</height></size></property><property name="styleSheet"><string notr="true">QWidget {
             font-family: "Arial";
             font-size: 11pt;
@@ -3329,7 +3307,6 @@ QPushButton:hover { background-color: #E8F5F3; }
             <property name="cursor">
              <cursorShape>PointingHandCursor</cursorShape>
             </property>
->>>>>>> Stashed changes
            </widget>
           </item>
          </layout>

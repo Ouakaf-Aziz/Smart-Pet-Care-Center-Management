@@ -1,11 +1,6 @@
 #include "gsmartpetcare.h"
 
 #include <QApplication>
-<<<<<<< Updated upstream
-
-int main(int argc, char *argv[])
-{
-=======
 #include <QCoreApplication>
 #include <QPalette>
 #include <QStyleFactory>
@@ -52,8 +47,9 @@ int main(int argc, char *argv[])
     QCoreApplication::setOrganizationName("PetNova");
     QCoreApplication::setApplicationName("GestionEmployes");
 
->>>>>>> Stashed changes
     QApplication a(argc, argv);
+    appliquerThemeClair(a);
+
     GSmartPetCare w;
     w.showMaximized();      // plein écran : la page des employés est large (tableau + fiche)
     return a.exec();

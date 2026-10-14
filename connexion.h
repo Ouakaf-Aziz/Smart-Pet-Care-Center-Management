@@ -8,7 +8,7 @@
 class QWidget;
 namespace Ui { class GSmartPetCare; }
 
-// Page d'authentification (pageLogin de gsmartpetcare.ui) : email + mot de passe, ou reconnaissance faciale.
+// Page d'authentification (pageLogin de gsmartpetcare.ui) : email + mot de passe.
 // Émet connecte(id) quand l'employé est identifié, abandon() après 5 échecs.
 class Connexion : public QObject
 {
@@ -23,7 +23,6 @@ signals:
 
 private slots:
     void onConnecter();
-    void onVisage();
 
 private:
     void afficherErreur(const QString &message);

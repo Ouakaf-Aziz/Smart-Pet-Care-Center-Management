@@ -1,8 +1,6 @@
 #include "gsmartpetcare.h"
 #include "ui_gsmartpetcare.h"
 #include "gestionservices.h"
-<<<<<<< Updated upstream
-=======
 #include "gestionrdv.h"
 #include "connexion.h"
 #include "facedialog.h"
@@ -10,7 +8,6 @@
 #include "gestionemployes.h"
 #include "privileges.h"
 #include "statistiquesemployes.h"
->>>>>>> Stashed changes
 
 #include <QGraphicsDropShadowEffect>
 #include <QIcon>
@@ -46,8 +43,6 @@ GSmartPetCare::GSmartPetCare(QWidget *parent)
     // GestionServices se charge de leur comportement.
     gestionServices = new GestionServices(ui, this, this);
 
-<<<<<<< Updated upstream
-=======
     // Page « Gestion des rendez-vous » : même principe (pageRDV dans ce même .ui).
     gestionRdv = new GestionRdv(ui, this, this);
 
@@ -68,7 +63,6 @@ GSmartPetCare::GSmartPetCare(QWidget *parent)
     connect(m_statsEmployes, &StatistiquesEmployes::retour, this, [this]() { afficherContenu(ContenuEmployes); });
     connect(m_privileges, &Privileges::termine, this, [this]() { afficherContenu(ContenuEmployes); });
 
->>>>>>> Stashed changes
     // Navigation depuis le menu latéral (toujours visible : seule la zone de contenu change)
     afficherContenu(ContenuAccueil);
     connect(ui->btnNavAccueil, &QPushButton::clicked, this, [this]() {
@@ -77,15 +71,12 @@ GSmartPetCare::GSmartPetCare(QWidget *parent)
     connect(ui->btnNavServices, &QPushButton::clicked, this, [this]() {
         afficherContenu(ContenuServices);
     });
-<<<<<<< Updated upstream
-=======
     connect(ui->btnNavEmployes, &QPushButton::clicked, this, [this]() {
         afficherContenu(ContenuEmployes);
     });
     connect(ui->btnNavRDV, &QPushButton::clicked, this, [this]() {
         afficherContenu(ContenuRDV);
     });
->>>>>>> Stashed changes
 
     // Déconnexion : retour à la page de connexion
     connect(ui->btnDeconnexion, &QPushButton::clicked, this, [this]() {
@@ -101,12 +92,6 @@ void GSmartPetCare::afficherContenu(int index)
 {
     ui->stackContenu->setCurrentIndex(index);
 
-<<<<<<< Updated upstream
-    // Le bouton actif est repéré par la propriété « actif » (voir la feuille de style du .ui)
-    const struct { QPushButton *bouton; int page; } liens[] = {
-        { ui->btnNavAccueil,  ContenuAccueil },
-        { ui->btnNavServices, ContenuServices },
-=======
     // Le bouton actif est repéré par la propriété « actif » (voir la feuille de style du .ui).
     // Les trois pages du module employés (liste, statistiques, privilèges) allument « Gestion des employés ».
     const bool pageEmployes = index == ContenuEmployes || index == ContenuStatsEmployes || index == ContenuPrivileges;
@@ -115,7 +100,6 @@ void GSmartPetCare::afficherContenu(int index)
         { ui->btnNavServices, index == ContenuServices },
         { ui->btnNavEmployes, pageEmployes },
         { ui->btnNavRDV,      index == ContenuRDV },
->>>>>>> Stashed changes
     };
     for (const auto &l : liens) {
         l.bouton->setProperty("actif", l.actif);
