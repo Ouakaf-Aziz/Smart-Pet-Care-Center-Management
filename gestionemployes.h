@@ -10,7 +10,6 @@ class QWidget;
 namespace Ui { class GSmartPetCare; }
 
 // Écran « Gestion des employés » : logique de la page pageEmployes de gsmartpetcare.ui
-// (modifiable avec Qt Designer). Ce n'est plus une fenêtre : elle pilote les widgets de la page.
 class GestionEmployes : public QObject
 {
     Q_OBJECT

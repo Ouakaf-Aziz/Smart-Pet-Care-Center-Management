@@ -13,9 +13,6 @@ SOURCES += \
     historiqueservices.cpp \
     statistiquesservices.cpp \
     donutchart.cpp \
-<<<<<<< Updated upstream
-    barchart.cpp
-=======
     barchart.cpp \
     linechart.cpp \
     statistiquesdialog.cpp \
@@ -26,7 +23,6 @@ SOURCES += \
     faceauth.cpp \
     facedialog.cpp \
     faceengine.cpp
->>>>>>> Stashed changes
 
 HEADERS += \
     gsmartpetcare.h \
@@ -35,9 +31,6 @@ HEADERS += \
     statistiquesservices.h \
     donutchart.h \
     barchart.h \
-<<<<<<< Updated upstream
-    donnees.h
-=======
     linechart.h \
     donnees.h \
     statistiquesdialog.h \
@@ -49,7 +42,6 @@ HEADERS += \
     facedialog.h \
     faceengine.h \
     donneesemployes.h
->>>>>>> Stashed changes
 
 # Un seul fichier .ui pour toute l'application (services, rendez-vous, employés)
 FORMS += \
