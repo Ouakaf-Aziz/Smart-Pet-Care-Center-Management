@@ -1,9 +1,11 @@
 #include "gsmartpetcare.h"
+#include "connection.h"          // ← AJOUT
 
 #include <QApplication>
 #include <QCoreApplication>
 #include <QPalette>
 #include <QStyleFactory>
+#include <QMessageBox>           // ← AJOUT
 
 // Force un thème clair (fond blanc), même si Windows est en mode sombre
 // (boîtes de dialogue, calendrier déroulant, etc. restent lisibles)
@@ -50,7 +52,21 @@ int main(int argc, char *argv[])
     QApplication a(argc, argv);
     appliquerThemeClair(a);
 
+    // ===== AJOUT : connexion à la base de données Oracle =====
+    Connection& c = Connection::createInstance();
+    bool test = c.createConnection();
+
+    if (!test) {
+        QMessageBox::critical(nullptr, QObject::tr("Base de données"),
+                              QObject::tr("Échec de la connexion à la base de données.\n"
+                                          "Vérifiez la source ODBC, l'utilisateur et le mot de passe."),
+                              QMessageBox::Cancel);
+        return -1;               // on quitte : l'application ne peut pas fonctionner sans la base
+    }
+    // =========================================================
+
     GSmartPetCare w;
     w.showMaximized();      // plein écran : la page des employés est large (tableau + fiche)
     return a.exec();
+
 }

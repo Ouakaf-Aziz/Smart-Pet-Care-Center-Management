@@ -1,4 +1,5 @@
-QT       += core gui widgets
+QT       += core gui widgets sql
+CONFIG   += console
 
 CONFIG   += c++17
 
@@ -7,6 +8,7 @@ CONFIG   += c++17
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000
 
 SOURCES += \
+    connection.cpp \
     main.cpp \
     gsmartpetcare.cpp \
     gestionservices.cpp \
@@ -28,6 +30,7 @@ SOURCES += \
     faceengine.cpp
 
 HEADERS += \
+    connection.h \
     gsmartpetcare.h \
     gestionservices.h \
     gestionrdv.h \
