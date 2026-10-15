@@ -1,16 +1,14 @@
 #include "gsmartpetcare.h"
 #include "ui_gsmartpetcare.h"
 #include "gestionservices.h"
-<<<<<<< Updated upstream
-=======
 #include "gestionrdv.h"
+#include "gestionanimaux.h"
 #include "connexion.h"
 #include "facedialog.h"
 #include "faceauth.h"
 #include "gestionemployes.h"
 #include "privileges.h"
 #include "statistiquesemployes.h"
->>>>>>> Stashed changes
 
 #include <QGraphicsDropShadowEffect>
 #include <QIcon>
@@ -46,10 +44,24 @@ GSmartPetCare::GSmartPetCare(QWidget *parent)
     // GestionServices se charge de leur comportement.
     gestionServices = new GestionServices(ui, this, this);
 
-<<<<<<< Updated upstream
-=======
     // Page « Gestion des rendez-vous » : même principe (pageRDV dans ce même .ui).
     gestionRdv = new GestionRdv(ui, this, this);
+
+    // Page « Gestion des animaux » : même principe (pageAnimaux dans ce même .ui). C'est elle qui fournit
+    // au module Services la liste des animaux de l'historique des services rendus.
+    m_animaux = new GestionAnimaux(ui, this, this);
+    gestionServices->setAnimaux(m_animaux->animaux());
+    ui->badgeAnimaux->setText(QString::number(m_animaux->nombreAnimaux()));
+    connect(m_animaux, &GestionAnimaux::animauxChanges, this, [this]() {
+        gestionServices->setAnimaux(m_animaux->animaux());
+        ui->badgeAnimaux->setText(QString::number(m_animaux->nombreAnimaux()));
+    });
+    connect(m_animaux, &GestionAnimaux::animalSupprime, this, [this](int animalId) {
+        gestionServices->animalSupprime(animalId);      // efface aussi son historique de services
+    });
+    connect(m_animaux, &GestionAnimaux::historiqueDemande, this, [this](int animalId) {
+        gestionServices->afficherHistorique(animalId);
+    });
 
     // Module « Gestion des employés » : même principe (pageEmployes, pageStatsEmployes, pagePrivileges
     // et pageVisage dans ce même .ui). Les employés servent aussi à l'authentification.
@@ -68,7 +80,6 @@ GSmartPetCare::GSmartPetCare(QWidget *parent)
     connect(m_statsEmployes, &StatistiquesEmployes::retour, this, [this]() { afficherContenu(ContenuEmployes); });
     connect(m_privileges, &Privileges::termine, this, [this]() { afficherContenu(ContenuEmployes); });
 
->>>>>>> Stashed changes
     // Navigation depuis le menu latéral (toujours visible : seule la zone de contenu change)
     afficherContenu(ContenuAccueil);
     connect(ui->btnNavAccueil, &QPushButton::clicked, this, [this]() {
@@ -77,15 +88,15 @@ GSmartPetCare::GSmartPetCare(QWidget *parent)
     connect(ui->btnNavServices, &QPushButton::clicked, this, [this]() {
         afficherContenu(ContenuServices);
     });
-<<<<<<< Updated upstream
-=======
     connect(ui->btnNavEmployes, &QPushButton::clicked, this, [this]() {
         afficherContenu(ContenuEmployes);
     });
     connect(ui->btnNavRDV, &QPushButton::clicked, this, [this]() {
         afficherContenu(ContenuRDV);
     });
->>>>>>> Stashed changes
+    connect(ui->btnNavAnimaux, &QPushButton::clicked, this, [this]() {
+        afficherContenu(ContenuAnimaux);
+    });
 
     // Déconnexion : retour à la page de connexion
     connect(ui->btnDeconnexion, &QPushButton::clicked, this, [this]() {
@@ -101,12 +112,6 @@ void GSmartPetCare::afficherContenu(int index)
 {
     ui->stackContenu->setCurrentIndex(index);
 
-<<<<<<< Updated upstream
-    // Le bouton actif est repéré par la propriété « actif » (voir la feuille de style du .ui)
-    const struct { QPushButton *bouton; int page; } liens[] = {
-        { ui->btnNavAccueil,  ContenuAccueil },
-        { ui->btnNavServices, ContenuServices },
-=======
     // Le bouton actif est repéré par la propriété « actif » (voir la feuille de style du .ui).
     // Les trois pages du module employés (liste, statistiques, privilèges) allument « Gestion des employés ».
     const bool pageEmployes = index == ContenuEmployes || index == ContenuStatsEmployes || index == ContenuPrivileges;
@@ -115,7 +120,7 @@ void GSmartPetCare::afficherContenu(int index)
         { ui->btnNavServices, index == ContenuServices },
         { ui->btnNavEmployes, pageEmployes },
         { ui->btnNavRDV,      index == ContenuRDV },
->>>>>>> Stashed changes
+        { ui->btnNavAnimaux,  index == ContenuAnimaux },
     };
     for (const auto &l : liens) {
         l.bouton->setProperty("actif", l.actif);
@@ -132,8 +137,10 @@ GSmartPetCare::~GSmartPetCare()
 void GSmartPetCare::onConnecte(int employeId)
 {
     m_employes->setUtilisateur(employeId);      // applique les privilèges de l'employé connecté
-    if (const Employe *e = m_baseEmployes.trouver(employeId))
+    if (const Employe *e = m_baseEmployes.trouver(employeId)) {
         ui->labelBienvenue->setText(QString("Bienvenue %1 %2  -  Rôle : %3").arg(e->prenom, e->nom, e->poste));
+        m_animaux->setUtilisateur(e->prenom + " " + e->nom);   // nom affiché dans l'assistant de diagnostic
+    }
     afficherContenu(ContenuAccueil);
     ui->stackedWidget->setCurrentIndex(PageAccueil);
 }

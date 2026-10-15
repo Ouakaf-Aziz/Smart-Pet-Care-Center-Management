@@ -10,4 +10,4 @@ release/
 # Configuration personnelle Qt Creator
 .qtcreator/
 *.pro.user
-*.pro.user.*
+*.pro.user.*

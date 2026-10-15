@@ -10,14 +10,12 @@ namespace Ui { class GSmartPetCare; }
 QT_END_NAMESPACE
 
 class GestionServices;
-<<<<<<< Updated upstream
-=======
 class GestionRdv;
+class GestionAnimaux;
 class Connexion;
 class GestionEmployes;
 class StatistiquesEmployes;
 class Privileges;
->>>>>>> Stashed changes
 
 class GSmartPetCare : public QMainWindow
 {
@@ -41,25 +39,24 @@ private:
     enum Page { PageLogin = 0, PageAccueil = 1, PageVisage = 2 };
 
     // Pages de la zone de contenu (QStackedWidget « stackContenu » du .ui)
-<<<<<<< Updated upstream
-    enum Contenu { ContenuAccueil = 0, ContenuServices = 1 };
-=======
     enum Contenu {
         ContenuAccueil = 0, ContenuServices = 1, ContenuRDV = 2,
-        ContenuEmployes = 3, ContenuStatsEmployes = 4, ContenuPrivileges = 5
+        ContenuEmployes = 3, ContenuStatsEmployes = 4, ContenuPrivileges = 5,
+        ContenuAnimaux = 6
     };
->>>>>>> Stashed changes
 
     // Affiche une page du contenu et met en surbrillance le bouton du menu correspondant
     void afficherContenu(int index);
 
     // Logique de la page « Gestion des services » (widgets définis dans le .ui)
     GestionServices *gestionServices = nullptr;
-<<<<<<< Updated upstream
-=======
 
     // Logique de la page « Gestion des rendez-vous » (widgets définis dans le même .ui)
     GestionRdv *gestionRdv = nullptr;
+
+    // Logique de la page « Gestion des animaux » (page pageAnimaux, même .ui). Fournit la liste des
+    // animaux au module Services (historique des services rendus).
+    GestionAnimaux *m_animaux = nullptr;
 
     // ----- Module employés (pages pageEmployes, pageStatsEmployes, pagePrivileges, pageVisage du même .ui) -----
     BaseEmployes m_baseEmployes;                 // employés en mémoire (+ visages enregistrés)
@@ -67,7 +64,6 @@ private:
     GestionEmployes *m_employes = nullptr;       // gestion des employés (CRUD, tri, recherche, PDF)
     StatistiquesEmployes *m_statsEmployes = nullptr;
     Privileges *m_privileges = nullptr;          // rôles et privilèges (consultation)
->>>>>>> Stashed changes
 };
 
 #endif // GSMARTPETCARE_H

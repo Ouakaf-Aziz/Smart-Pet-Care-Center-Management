@@ -23,8 +23,8 @@ public:
     // fenetre : fenêtre principale, utilisée comme parent des boîtes de dialogue
     GestionServices(Ui::GSmartPetCare *ui, QWidget *fenetre, QObject *parent = nullptr);
 
-    // ----- Points d'entrée pour le MODULE ANIMAL -----
-    // Donne (ou met à jour) la liste des animaux. À appeler au démarrage et à chaque changement.
+    // ----- Points d'entrée utilisés par le MODULE ANIMAL (GestionAnimaux) -----
+    // Donne (ou met à jour) la liste des animaux. Appelé au démarrage et à chaque changement.
     void setAnimaux(const QVector<Animal> &animaux);
     // À appeler quand un animal est supprimé : efface aussi son historique de services.
     void animalSupprime(int animalId);
@@ -43,7 +43,6 @@ private slots:
 
 private:
     void chargerDonneesExemple();        // données de démonstration (en mémoire)
-    void chargerAnimauxExemple();        // TEMPORAIRE : à remplacer par le module Animal
     void viderFormulaire();
     void remplirFormulaire(const Service &s);
     QWidget *creerBoutonsActions(int serviceId);

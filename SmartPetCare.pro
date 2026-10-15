@@ -10,6 +10,9 @@ SOURCES += \
     main.cpp \
     gsmartpetcare.cpp \
     gestionservices.cpp \
+    gestionrdv.cpp \
+    gestionanimaux.cpp \
+    statistiquesanimaux.cpp \
     historiqueservices.cpp \
     statistiquesservices.cpp \
     donutchart.cpp \
@@ -27,6 +30,9 @@ SOURCES += \
 HEADERS += \
     gsmartpetcare.h \
     gestionservices.h \
+    gestionrdv.h \
+    gestionanimaux.h \
+    statistiquesanimaux.h \
     historiqueservices.h \
     statistiquesservices.h \
     donutchart.h \
@@ -43,7 +49,7 @@ HEADERS += \
     faceengine.h \
     donneesemployes.h
 
-# Un seul fichier .ui pour toute l'application (services, rendez-vous, employés)
+# Un seul fichier .ui pour toute l'application (services, rendez-vous, employés, animaux)
 FORMS += \
     gsmartpetcare.ui
 

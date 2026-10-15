@@ -54,7 +54,6 @@ GestionServices::GestionServices(Ui::GSmartPetCare *uiPrincipal, QWidget *fenetr
             this, &GestionServices::refreshTable);
 
     chargerDonneesExemple();                 // données de démonstration (en mémoire)
-    chargerAnimauxExemple();                 // TEMPORAIRE (le module Animal fournira la vraie liste)
     viderFormulaire();                       // le panneau de droite démarre en mode « Ajouter »
     refreshTable();
 }
@@ -84,7 +83,7 @@ void GestionServices::chargerDonneesExemple()
     ajout("Séance d'éducation",    "Apprentissage des ordres de base.",    "Éducation",    50.0, 60, true);
     ajout("Bilan comportemental",  "Analyse et conseils personnalisés.",   "Comportement", 70.0, 45, true);
 
-    // Historique de démonstration (animaux 1, 2, 3 = ceux de chargerAnimauxExemple)
+    // Historique de démonstration (animaux 1, 2, 3 = Rex, Mimi, Coco du module Animal)
     auto rendu = [this](int animalId, int serviceId, int joursAvant, const QString &remarque) {
         const Service *s = trouver(serviceId);
         if (!s)
@@ -116,20 +115,6 @@ Service *GestionServices::trouver(int id)
         if (s.id == id)
             return &s;
     return nullptr;
-}
-
-// ---------------------------------------------------------------------------
-// TEMPORAIRE : animaux de test.
-// Quand le module Animal sera prêt, supprime cette fonction (et son appel dans le
-// constructeur) et appelle setAnimaux() avec sa vraie liste.
-// ---------------------------------------------------------------------------
-void GestionServices::chargerAnimauxExemple()
-{
-    QVector<Animal> animaux;
-    animaux.append({1, "Rex",  "Chien",  "Ali Ben Salah"});
-    animaux.append({2, "Mimi", "Chat",   "Sonia Trabelsi"});
-    animaux.append({3, "Coco", "Oiseau", "Mohamed Gharbi"});
-    setAnimaux(animaux);
 }
 
 // ---------------------------------------------------------------------------
