@@ -43,6 +43,7 @@ private slots:
 
 private:
     void chargerDonneesExemple();        // données de démonstration (en mémoire)
+    void chargerDepuisBase();            // CRUD : lit les services dans Oracle (table SERVICE)
     void viderFormulaire();
     void remplirFormulaire(const Service &s);
     QWidget *creerBoutonsActions(int serviceId);

@@ -15,8 +15,77 @@
 #include <QPushButton>
 #include <QSignalBlocker>
 #include <QTextDocument>
+#include <QSqlQuery>
+#include <QSqlError>
+#include <QDebug>
 
 #include <algorithm>
+
+// ---------------------------------------------------------------------------
+// Accès à la base Oracle (table SERVICE) : opérations du CRUD
+// ---------------------------------------------------------------------------
+static bool insererService(const Service &s)
+{
+    QSqlQuery q;
+    q.prepare("INSERT INTO SERVICE (NOM_SERVICE, DESCRIPTION_SERVICE, PRIX_SERVICE, "
+              "DUREE_SERVICE, TYPE_SERVICE, DISPONIBILITE) "
+              "VALUES (:nom, :desc, :prix, :duree, :type, :dispo)");
+    q.bindValue(":nom",   s.nom);
+    q.bindValue(":desc",  s.description);
+    q.bindValue(":prix",  s.prix);
+    q.bindValue(":duree", s.duree);
+    q.bindValue(":type",  s.type);
+    q.bindValue(":dispo", s.disponible ? 1 : 0);
+    if (!q.exec()) { qDebug() << "INSERT SERVICE :" << q.lastError().text(); return false; }
+    return true;
+}
+
+static bool modifierService(const Service &s)
+{
+    QSqlQuery q;
+    q.prepare("UPDATE SERVICE SET NOM_SERVICE=:nom, DESCRIPTION_SERVICE=:desc, "
+              "PRIX_SERVICE=:prix, DUREE_SERVICE=:duree, TYPE_SERVICE=:type, "
+              "DISPONIBILITE=:dispo WHERE ID_SERVICE=:id");
+    q.bindValue(":nom",   s.nom);
+    q.bindValue(":desc",  s.description);
+    q.bindValue(":prix",  s.prix);
+    q.bindValue(":duree", s.duree);
+    q.bindValue(":type",  s.type);
+    q.bindValue(":dispo", s.disponible ? 1 : 0);
+    q.bindValue(":id",    s.id);
+    if (!q.exec()) { qDebug() << "UPDATE SERVICE :" << q.lastError().text(); return false; }
+    return true;
+}
+
+static bool supprimerService(int id)
+{
+    QSqlQuery q;
+    q.prepare("DELETE FROM SERVICE WHERE ID_SERVICE=:id");
+    q.bindValue(":id", id);
+    if (!q.exec()) { qDebug() << "DELETE SERVICE :" << q.lastError().text(); return false; }
+    return true;
+}
+
+// Afficher : relit tous les services depuis Oracle
+void GestionServices::chargerDepuisBase()
+{
+    m_services.clear();
+    QSqlQuery q("SELECT ID_SERVICE, NOM_SERVICE, DESCRIPTION_SERVICE, PRIX_SERVICE, "
+                "DUREE_SERVICE, TYPE_SERVICE, DISPONIBILITE FROM SERVICE ORDER BY ID_SERVICE");
+    while (q.next()) {
+        Service s;
+        s.id          = q.value(0).toInt();
+        s.nom         = q.value(1).toString();
+        s.description = q.value(2).toString();
+        s.prix        = q.value(3).toDouble();
+        s.duree       = q.value(4).toInt();
+        s.type        = q.value(5).toString();
+        s.disponible  = (q.value(6).toInt() == 1);
+        m_services.append(s);
+    }
+    if (q.lastError().isValid())
+        qDebug() << "SELECT SERVICE :" << q.lastError().text();
+}
 
 GestionServices::GestionServices(Ui::GSmartPetCare *uiPrincipal, QWidget *fenetre, QObject *parent)
     : QObject(parent)
@@ -54,6 +123,7 @@ GestionServices::GestionServices(Ui::GSmartPetCare *uiPrincipal, QWidget *fenetr
             this, &GestionServices::refreshTable);
 
     chargerDonneesExemple();                 // données de démonstration (en mémoire)
+    chargerDepuisBase();                     // CRUD : la liste des services vient ensuite d'Oracle
     viderFormulaire();                       // le panneau de droite démarre en mode « Ajouter »
     refreshTable();
 }
@@ -229,7 +299,7 @@ void GestionServices::viderFormulaire()
 {
     m_currentId = -1;
     ui->labelDetailTitre->setText("Ajouter un service");
-    ui->lineEditIdService->setText(QString::number(m_prochainIdService));   // prochain id (lecture seule)
+    ui->lineEditIdService->setText("Auto");   // id attribué par Oracle (lecture seule)
     ui->lineEditNomService->clear();
     ui->lineEditPrix->clear();
     ui->lineEditDuree->clear();
@@ -313,9 +383,12 @@ void GestionServices::onSupprimer(int serviceId)
         != QMessageBox::Yes)
         return;
 
-    m_services.erase(std::remove_if(m_services.begin(), m_services.end(),
-                                    [serviceId](const Service &x) { return x.id == serviceId; }),
-                     m_services.end());
+    if (!supprimerService(serviceId)) {
+        QMessageBox::critical(m_fenetre, "Suppression impossible",
+            "Ce service est peut-être utilisé dans un rendez-vous (table INCLURE).");
+        return;
+    }
+    chargerDepuisBase();
     if (m_currentId == serviceId)
         viderFormulaire();                   // retour au mode « Ajouter »
     refreshTable();
@@ -327,6 +400,12 @@ void GestionServices::onEnregistrer()
     if (nom.isEmpty()) {
         QMessageBox::warning(m_fenetre, "Champ manquant", "Le nom du service est obligatoire.");
         ui->lineEditNomService->setFocus();
+        return;
+    }
+
+    if (ui->plainTextEditDescription->toPlainText().trimmed().isEmpty()) {
+        QMessageBox::warning(m_fenetre, "Champ manquant", "La description est obligatoire.");
+        ui->plainTextEditDescription->setFocus();
         return;
     }
 
@@ -355,13 +434,19 @@ void GestionServices::onEnregistrer()
     s.duree = duree;
     s.disponible = ui->checkBoxDisponible->isChecked();
 
+    bool ok = false;
     if (m_currentId < 0) {
-        s.id = m_prochainIdService++;
-        m_services.append(s);
-    } else if (Service *existant = trouver(m_currentId)) {
-        s.id = existant->id;
-        *existant = s;
+        ok = insererService(s);
+    } else {
+        s.id = m_currentId;
+        ok = modifierService(s);
     }
+    if (!ok) {
+        QMessageBox::critical(m_fenetre, "Base de données",
+                              "L'enregistrement a échoué (voir la sortie de l'application).");
+        return;
+    }
+    chargerDepuisBase();
 
     viderFormulaire();                       // enregistré : retour au mode « Ajouter »
     refreshTable();
