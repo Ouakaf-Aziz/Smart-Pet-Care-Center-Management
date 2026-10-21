@@ -5,17 +5,9 @@
 #include <QString>
 #include <QVector>
 
-// Un service proposé par la clinique.
-struct Service
-{
-    int     id = 0;
-    QString nom;
-    QString description;
-    QString type;
-    double  prix = 0.0;
-    int     duree = 0;          // minutes
-    bool    disponible = true;
-};
+// La classe Service (modèle lié à la table SERVICE) est définie dans service.h.
+// Elle remplace l'ancienne struct Service qui était ici (conflit de définition).
+#include "service.h"
 
 // Un animal, tel que FOURNI PAR LE MODULE ANIMAL (lecture seule dans ce module).
 // Seul l'id est indispensable : l'historique s'y rattache. Le reste sert à l'affichage.

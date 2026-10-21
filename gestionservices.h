@@ -6,14 +6,16 @@
 #include <QVector>
 
 #include "donnees.h"
+#include "service.h"
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class GSmartPetCare; }
 QT_END_NAMESPACE
 
-// Logique de la page « Gestion des services ».
+// VUE de la page « Gestion des services ».
 // L'interface (tableau, formulaire, boutons...) est définie dans gsmartpetcare.ui
 // (page « pageServices ») : cette classe ne fait que la piloter.
+// AUCUNE requête SQL ici : tout passe par la classe Service (modèle).
 class GestionServices : public QObject
 {
     Q_OBJECT
@@ -42,19 +44,19 @@ private slots:
     void refreshTable();                 // recherche + filtre + tri
 
 private:
-    void chargerDonneesExemple();        // données de démonstration (en mémoire)
-    void chargerDepuisBase();            // CRUD : lit les services dans Oracle (table SERVICE)
+    void chargerHistoriqueExemple();     // historique de démonstration (en mémoire)
+    void chargerDepuisBase();            // Read : demande la liste au modèle Service
     void viderFormulaire();
     void remplirFormulaire(const Service &s);
     QWidget *creerBoutonsActions(int serviceId);
-    Service *trouver(int id);
+    const Service *trouver(int id) const;
 
     Ui::GSmartPetCare *ui;
     QWidget *m_fenetre;
-    QVector<Service> m_services;
+    QVector<Service> m_services;         // copie en mémoire de la table SERVICE
+    Service m_etmp;                      // objet du modèle pour appeler supprimer(int)
     DonneesHistorique m_histo;           // animaux + services rendus
     int m_currentId = -1;                // -1 = mode « Ajouter » ; sinon id du service en cours de modification
-    int m_prochainIdService = 1;         // prochain id à attribuer à un service
 };
 
 #endif // GESTIONSERVICES_H

@@ -14,6 +14,7 @@ SOURCES += \
     gestionservices.cpp \
     gestionrdv.cpp \
     gestionanimaux.cpp \
+    service.cpp \
     statistiquesanimaux.cpp \
     historiqueservices.cpp \
     statistiquesservices.cpp \
@@ -35,6 +36,7 @@ HEADERS += \
     gestionservices.h \
     gestionrdv.h \
     gestionanimaux.h \
+    service.h \
     statistiquesanimaux.h \
     historiqueservices.h \
     statistiquesservices.h \

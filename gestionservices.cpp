@@ -15,77 +15,13 @@
 #include <QPushButton>
 #include <QSignalBlocker>
 #include <QTextDocument>
-#include <QSqlQuery>
-#include <QSqlError>
-#include <QDebug>
 
 #include <algorithm>
 
-// ---------------------------------------------------------------------------
-// Accès à la base Oracle (table SERVICE) : opérations du CRUD
-// ---------------------------------------------------------------------------
-static bool insererService(const Service &s)
-{
-    QSqlQuery q;
-    q.prepare("INSERT INTO SERVICE (NOM_SERVICE, DESCRIPTION_SERVICE, PRIX_SERVICE, "
-              "DUREE_SERVICE, TYPE_SERVICE, DISPONIBILITE) "
-              "VALUES (:nom, :desc, :prix, :duree, :type, :dispo)");
-    q.bindValue(":nom",   s.nom);
-    q.bindValue(":desc",  s.description);
-    q.bindValue(":prix",  s.prix);
-    q.bindValue(":duree", s.duree);
-    q.bindValue(":type",  s.type);
-    q.bindValue(":dispo", s.disponible ? 1 : 0);
-    if (!q.exec()) { qDebug() << "INSERT SERVICE :" << q.lastError().text(); return false; }
-    return true;
-}
-
-static bool modifierService(const Service &s)
-{
-    QSqlQuery q;
-    q.prepare("UPDATE SERVICE SET NOM_SERVICE=:nom, DESCRIPTION_SERVICE=:desc, "
-              "PRIX_SERVICE=:prix, DUREE_SERVICE=:duree, TYPE_SERVICE=:type, "
-              "DISPONIBILITE=:dispo WHERE ID_SERVICE=:id");
-    q.bindValue(":nom",   s.nom);
-    q.bindValue(":desc",  s.description);
-    q.bindValue(":prix",  s.prix);
-    q.bindValue(":duree", s.duree);
-    q.bindValue(":type",  s.type);
-    q.bindValue(":dispo", s.disponible ? 1 : 0);
-    q.bindValue(":id",    s.id);
-    if (!q.exec()) { qDebug() << "UPDATE SERVICE :" << q.lastError().text(); return false; }
-    return true;
-}
-
-static bool supprimerService(int id)
-{
-    QSqlQuery q;
-    q.prepare("DELETE FROM SERVICE WHERE ID_SERVICE=:id");
-    q.bindValue(":id", id);
-    if (!q.exec()) { qDebug() << "DELETE SERVICE :" << q.lastError().text(); return false; }
-    return true;
-}
-
-// Afficher : relit tous les services depuis Oracle
-void GestionServices::chargerDepuisBase()
-{
-    m_services.clear();
-    QSqlQuery q("SELECT ID_SERVICE, NOM_SERVICE, DESCRIPTION_SERVICE, PRIX_SERVICE, "
-                "DUREE_SERVICE, TYPE_SERVICE, DISPONIBILITE FROM SERVICE ORDER BY ID_SERVICE");
-    while (q.next()) {
-        Service s;
-        s.id          = q.value(0).toInt();
-        s.nom         = q.value(1).toString();
-        s.description = q.value(2).toString();
-        s.prix        = q.value(3).toDouble();
-        s.duree       = q.value(4).toInt();
-        s.type        = q.value(5).toString();
-        s.disponible  = (q.value(6).toInt() == 1);
-        m_services.append(s);
-    }
-    if (q.lastError().isValid())
-        qDebug() << "SELECT SERVICE :" << q.lastError().text();
-}
+// ===========================================================================
+// VUE : aucune requête SQL dans ce fichier.
+// Toutes les opérations sur la base passent par la classe Service (modèle).
+// ===========================================================================
 
 GestionServices::GestionServices(Ui::GSmartPetCare *uiPrincipal, QWidget *fenetre, QObject *parent)
     : QObject(parent)
@@ -102,18 +38,18 @@ GestionServices::GestionServices(Ui::GSmartPetCare *uiPrincipal, QWidget *fenetr
     h->setSectionResizeMode(0, QHeaderView::Fixed);   h->resizeSection(0, 45);    // ID
     h->setSectionResizeMode(1, QHeaderView::Stretch);                              // Nom du service
     h->setSectionResizeMode(2, QHeaderView::Fixed);   h->resizeSection(2, 100);   // Type
-    h->setSectionResizeMode(3, QHeaderView::Fixed);   h->resizeSection(3, 80);   // Prix (DT)
-    h->setSectionResizeMode(4, QHeaderView::Fixed);   h->resizeSection(4, 90);   // Durée (min)
-    h->setSectionResizeMode(5, QHeaderView::Fixed);   h->resizeSection(5, 88);   // Disponible
+    h->setSectionResizeMode(3, QHeaderView::Fixed);   h->resizeSection(3, 80);    // Prix (DT)
+    h->setSectionResizeMode(4, QHeaderView::Fixed);   h->resizeSection(4, 90);    // Durée (min)
+    h->setSectionResizeMode(5, QHeaderView::Fixed);   h->resizeSection(5, 88);    // Disponible
     h->setSectionResizeMode(6, QHeaderView::Fixed);   h->resizeSection(6, 205);   // Actions
 
     ui->frameDetail->setMaximumWidth(320);                 // panneau de détails un peu plus étroit
 
     // --- Connexions ---
-    connect(ui->pushButtonExporterPdf,&QPushButton::clicked, this, &GestionServices::onExporterPdf);
-    connect(ui->pushButtonEnregistrer,&QPushButton::clicked, this, &GestionServices::onEnregistrer);
-    connect(ui->pushButtonAnnuler,    &QPushButton::clicked, this, &GestionServices::onAnnuler);
-    connect(ui->pushButtonHistorique, &QPushButton::clicked, this, &GestionServices::onHistorique);
+    connect(ui->pushButtonExporterPdf,  &QPushButton::clicked, this, &GestionServices::onExporterPdf);
+    connect(ui->pushButtonEnregistrer,  &QPushButton::clicked, this, &GestionServices::onEnregistrer);
+    connect(ui->pushButtonAnnuler,      &QPushButton::clicked, this, &GestionServices::onAnnuler);
+    connect(ui->pushButtonHistorique,   &QPushButton::clicked, this, &GestionServices::onHistorique);
     connect(ui->pushButtonStatistiques, &QPushButton::clicked, this, &GestionServices::onStatistiques);
 
     connect(ui->lineEditRecherche, &QLineEdit::textChanged, this, &GestionServices::refreshTable);
@@ -122,48 +58,34 @@ GestionServices::GestionServices(Ui::GSmartPetCare *uiPrincipal, QWidget *fenetr
     connect(ui->comboBoxFiltreType, QOverload<int>::of(&QComboBox::currentIndexChanged),
             this, &GestionServices::refreshTable);
 
-    chargerDonneesExemple();                 // données de démonstration (en mémoire)
-    chargerDepuisBase();                     // CRUD : la liste des services vient ensuite d'Oracle
+    chargerDepuisBase();                     // READ : les services viennent d'Oracle (via Service)
+    chargerHistoriqueExemple();              // historique de démo (ignoré si les services n'existent pas)
     viderFormulaire();                       // le panneau de droite démarre en mode « Ajouter »
     refreshTable();
 }
 
-// ---------------------------------------------------------------------------
-// Données de démonstration (gardées en mémoire, sans base de données)
-// ---------------------------------------------------------------------------
-void GestionServices::chargerDonneesExemple()
+// READ : la vue demande la liste au modèle ; elle ne connaît pas le SQL.
+void GestionServices::chargerDepuisBase()
 {
-    auto ajout = [this](const QString &nom, const QString &desc, const QString &type,
-                        double prix, int duree, bool dispo) {
-        Service s;
-        s.nom = nom; s.description = desc; s.type = type;
-        s.prix = prix; s.duree = duree; s.disponible = dispo;
-        s.id = m_prochainIdService++;
-        m_services.append(s);
-    };
+    m_services = Service::lister();
+}
 
-    ajout("Consultation générale", "Examen clinique complet de l'animal.", "Consultation", 30.0, 30, true);
-    ajout("Consultation de suivi", "Contrôle après traitement.",           "Consultation", 20.0, 20, true);
-    ajout("Vaccin antirabique",    "Vaccination annuelle contre la rage.", "Vaccination",  45.0, 15, true);
-    ajout("Vaccin polyvalent",     "Protection contre les maladies courantes.", "Vaccination", 60.0, 20, true);
-    ajout("Traitement antiparasitaire", "Traitement contre puces et vers.", "Traitement",  35.0, 25, true);
-    ajout("Soin de plaie",         "Nettoyage et pansement.",              "Traitement",   40.0, 30, false);
-    ajout("Stérilisation",         "Intervention chirurgicale sous anesthésie.", "Chirurgie", 250.0, 90, true);
-    ajout("Chirurgie dentaire",    "Détartrage et extraction.",            "Chirurgie",   180.0, 75, true);
-    ajout("Séance d'éducation",    "Apprentissage des ordres de base.",    "Éducation",    50.0, 60, true);
-    ajout("Bilan comportemental",  "Analyse et conseils personnalisés.",   "Comportement", 70.0, 45, true);
-
-    // Historique de démonstration (animaux 1, 2, 3 = Rex, Mimi, Coco du module Animal)
+// ---------------------------------------------------------------------------
+// Historique de démonstration (gardé en mémoire)
+// ---------------------------------------------------------------------------
+void GestionServices::chargerHistoriqueExemple()
+{
+    // Animaux 1, 2, 3 = Rex, Mimi, Coco du module Animal
     auto rendu = [this](int animalId, int serviceId, int joursAvant, const QString &remarque) {
         const Service *s = trouver(serviceId);
         if (!s)
             return;
         ServiceRendu r;
         r.animalId = animalId;
-        r.serviceId = s->id;
-        r.nomService = s->nom;
-        r.type = s->type;
-        r.prix = s->prix;
+        r.serviceId = s->getID();
+        r.nomService = s->getNom();
+        r.type = s->getType();
+        r.prix = s->getPrix();
         r.date = QDate::currentDate().addDays(-joursAvant);
         r.remarque = remarque;
         r.id = m_histo.prochainId++;
@@ -179,10 +101,10 @@ void GestionServices::chargerDonneesExemple()
     rendu(3, 1,  45, "Plumage à surveiller.");
 }
 
-Service *GestionServices::trouver(int id)
+const Service *GestionServices::trouver(int id) const
 {
-    for (Service &s : m_services)
-        if (s.id == id)
+    for (const Service &s : m_services)
+        if (s.getID() == id)
             return &s;
     return nullptr;
 }
@@ -219,32 +141,32 @@ void GestionServices::refreshTable()
 
     QVector<Service> vue;
     for (const Service &s : m_services) {
-        if (!typeFiltre.isEmpty() && s.type != typeFiltre)
+        if (!typeFiltre.isEmpty() && s.getType() != typeFiltre)
             continue;
         if (!q.isEmpty()
-            && !s.nom.contains(q, Qt::CaseInsensitive)
-            && !s.description.contains(q, Qt::CaseInsensitive)
-            && !s.type.contains(q, Qt::CaseInsensitive))
+            && !s.getNom().contains(q, Qt::CaseInsensitive)
+            && !s.getDescription().contains(q, Qt::CaseInsensitive)
+            && !s.getType().contains(q, Qt::CaseInsensitive))
             continue;
         vue.append(s);
     }
 
     switch (ui->comboBoxTri->currentIndex()) {
     case 1:  // Prix
-        std::sort(vue.begin(), vue.end(), [](const Service &a, const Service &b) { return a.prix < b.prix; });
+        std::sort(vue.begin(), vue.end(), [](const Service &a, const Service &b) { return a.getPrix() < b.getPrix(); });
         break;
     case 2:  // Durée
-        std::sort(vue.begin(), vue.end(), [](const Service &a, const Service &b) { return a.duree < b.duree; });
+        std::sort(vue.begin(), vue.end(), [](const Service &a, const Service &b) { return a.getDuree() < b.getDuree(); });
         break;
     case 3:  // Type
         std::sort(vue.begin(), vue.end(), [](const Service &a, const Service &b) {
-            const int c = QString::localeAwareCompare(a.type, b.type);
-            return c != 0 ? c < 0 : QString::localeAwareCompare(a.nom, b.nom) < 0;
+            const int c = QString::localeAwareCompare(a.getType(), b.getType());
+            return c != 0 ? c < 0 : QString::localeAwareCompare(a.getNom(), b.getNom()) < 0;
         });
         break;
     default: // Nom
         std::sort(vue.begin(), vue.end(), [](const Service &a, const Service &b) {
-            return QString::localeAwareCompare(a.nom, b.nom) < 0;
+            return QString::localeAwareCompare(a.getNom(), b.getNom()) < 0;
         });
         break;
     }
@@ -259,27 +181,27 @@ void GestionServices::refreshTable()
         for (int r = 0; r < vue.size(); ++r) {
             const Service &s = vue[r];
 
-            auto *itId = new QTableWidgetItem(QString::number(s.id));
-            itId->setData(Qt::UserRole, s.id);
+            auto *itId = new QTableWidgetItem(QString::number(s.getID()));
+            itId->setData(Qt::UserRole, s.getID());
             itId->setTextAlignment(Qt::AlignCenter);
 
-            auto *itPrix = new QTableWidgetItem(QString::number(s.prix, 'f', 2));
+            auto *itPrix = new QTableWidgetItem(QString::number(s.getPrix(), 'f', 2));
             itPrix->setTextAlignment(Qt::AlignCenter);
-            auto *itDuree = new QTableWidgetItem(QString::number(s.duree));
+            auto *itDuree = new QTableWidgetItem(QString::number(s.getDuree()));
             itDuree->setTextAlignment(Qt::AlignCenter);
-            auto *itDispo = new QTableWidgetItem(s.disponible ? "Oui" : "Non");
+            auto *itDispo = new QTableWidgetItem(s.isDisponible() ? "Oui" : "Non");
             itDispo->setTextAlignment(Qt::AlignCenter);
 
             t->setItem(r, 0, itId);
-            t->setItem(r, 1, new QTableWidgetItem(s.nom));
-            t->setItem(r, 2, new QTableWidgetItem(s.type));
+            t->setItem(r, 1, new QTableWidgetItem(s.getNom()));
+            t->setItem(r, 2, new QTableWidgetItem(s.getType()));
             t->setItem(r, 3, itPrix);
             t->setItem(r, 4, itDuree);
             t->setItem(r, 5, itDispo);
             t->setItem(r, 6, new QTableWidgetItem());      // colonne « Actions » (boutons ci-dessous)
-            t->setCellWidget(r, 6, creerBoutonsActions(s.id));
+            t->setCellWidget(r, 6, creerBoutonsActions(s.getID()));
 
-            if (s.id == m_currentId)
+            if (s.getID() == m_currentId)
                 ligneSelection = r;
         }
 
@@ -313,13 +235,13 @@ void GestionServices::viderFormulaire()
 void GestionServices::remplirFormulaire(const Service &s)
 {
     ui->labelDetailTitre->setText("Modifier le service");
-    ui->lineEditIdService->setText(QString::number(s.id));
-    ui->lineEditNomService->setText(s.nom);
-    ui->lineEditPrix->setText(QString::number(s.prix, 'f', 2));
-    ui->lineEditDuree->setText(QString::number(s.duree));
-    ui->plainTextEditDescription->setPlainText(s.description);
-    ui->comboBoxType->setCurrentText(s.type);
-    ui->checkBoxDisponible->setChecked(s.disponible);
+    ui->lineEditIdService->setText(QString::number(s.getID()));
+    ui->lineEditNomService->setText(s.getNom());
+    ui->lineEditPrix->setText(QString::number(s.getPrix(), 'f', 2));
+    ui->lineEditDuree->setText(QString::number(s.getDuree()));
+    ui->plainTextEditDescription->setPlainText(s.getDescription());
+    ui->comboBoxType->setCurrentText(s.getType());
+    ui->checkBoxDisponible->setChecked(s.isDisponible());
 }
 
 // ---------------------------------------------------------------------------
@@ -333,7 +255,6 @@ QWidget *GestionServices::creerBoutonsActions(int serviceId)
     lay->setContentsMargins(6, 4, 6, 4);
     lay->setSpacing(8);
 
-    // Même style que le bouton « Historique » (fond plein, texte blanc en gras, coins arrondis)
     auto *btnModifier = new QPushButton("Modifier", conteneur);
     btnModifier->setObjectName("btnModifierLigne");
     btnModifier->setFixedHeight(32);
@@ -372,6 +293,7 @@ void GestionServices::onModifier(int serviceId)
     ui->lineEditNomService->selectAll();
 }
 
+// DELETE : la vue appelle Service::supprimer(), puis rafraîchit l'affichage.
 void GestionServices::onSupprimer(int serviceId)
 {
     const Service *s = trouver(serviceId);
@@ -379,23 +301,28 @@ void GestionServices::onSupprimer(int serviceId)
         return;
 
     if (QMessageBox::question(m_fenetre, "Supprimer",
-                              QString("Supprimer le service « %1 » ?").arg(s->nom))
+                              QString("Supprimer le service « %1 » ?").arg(s->getNom()))
         != QMessageBox::Yes)
         return;
 
-    if (!supprimerService(serviceId)) {
+    bool test = m_etmp.supprimer(serviceId);
+
+    if (!test) {
         QMessageBox::critical(m_fenetre, "Suppression impossible",
             "Ce service est peut-être utilisé dans un rendez-vous (table INCLURE).");
         return;
     }
-    chargerDepuisBase();
+
+    chargerDepuisBase();                     // Refresh (Actualiser) après la suppression
     if (m_currentId == serviceId)
         viderFormulaire();                   // retour au mode « Ajouter »
     refreshTable();
 }
 
+// CREATE / UPDATE : contrôle de saisie en C++, puis appel du modèle.
 void GestionServices::onEnregistrer()
 {
+    // ----- Contrôle de saisie -----
     const QString nom = ui->lineEditNomService->text().trimmed();
     if (nom.isEmpty()) {
         QMessageBox::warning(m_fenetre, "Champ manquant", "Le nom du service est obligatoire.");
@@ -403,7 +330,8 @@ void GestionServices::onEnregistrer()
         return;
     }
 
-    if (ui->plainTextEditDescription->toPlainText().trimmed().isEmpty()) {
+    const QString description = ui->plainTextEditDescription->toPlainText().trimmed();
+    if (description.isEmpty()) {
         QMessageBox::warning(m_fenetre, "Champ manquant", "La description est obligatoire.");
         ui->plainTextEditDescription->setFocus();
         return;
@@ -426,28 +354,25 @@ void GestionServices::onEnregistrer()
         return;
     }
 
-    Service s;
-    s.nom = nom;
-    s.description = ui->plainTextEditDescription->toPlainText().trimmed();
-    s.type = ui->comboBoxType->currentText();
-    s.prix = prix;
-    s.duree = duree;
-    s.disponible = ui->checkBoxDisponible->isChecked();
+    // ----- Récupération des informations saisies et instanciation de l'objet du modèle -----
+    Service s(m_currentId < 0 ? 0 : m_currentId,
+              nom,
+              description,
+              ui->comboBoxType->currentText(),
+              prix,
+              duree,
+              ui->checkBoxDisponible->isChecked());
 
-    bool ok = false;
-    if (m_currentId < 0) {
-        ok = insererService(s);
-    } else {
-        s.id = m_currentId;
-        ok = modifierService(s);
-    }
-    if (!ok) {
+    // ----- Appel du modèle (aucune requête ici) -----
+    bool test = (m_currentId < 0) ? s.ajouter() : s.modifier();
+
+    if (!test) {
         QMessageBox::critical(m_fenetre, "Base de données",
                               "L'enregistrement a échoué (voir la sortie de l'application).");
         return;
     }
-    chargerDepuisBase();
 
+    chargerDepuisBase();                     // Refresh (Actualiser) après l'ajout / la modification
     viderFormulaire();                       // enregistré : retour au mode « Ajouter »
     refreshTable();
 }
