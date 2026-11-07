@@ -1,4 +1,4 @@
-QT       += core gui widgets sql
+QT       += core gui widgets sql network
 CONFIG   += console
 CONFIG   += c++17
 
@@ -6,12 +6,14 @@ SOURCES += \
     main.cpp \
     connection.cpp \
     gsmartpetcare.cpp \
-    RendezVous.cpp
+    RendezVous.cpp \
+    service.cpp
 
 HEADERS += \
     connection.h \
     gsmartpetcare.h \
-    RendezVous.h
+    RendezVous.h \
+    service.h
 
 FORMS += \
     gsmartpetcare.ui

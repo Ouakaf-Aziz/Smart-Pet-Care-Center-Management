@@ -1,5 +1,6 @@
 #include "gsmartpetcare.h"
-#include "connection.h"          // ← AJOUT
+#include "connection.h"
+#include "service.h"          // ← AJOUT
 
 #include <QApplication>
 #include <QCoreApplication>
@@ -64,6 +65,8 @@ int main(int argc, char *argv[])
         return -1;               // on quitte : l'application ne peut pas fonctionner sans la base
     }
     // =========================================================
+
+    Service::demarrerRappels(&a);   // MODULE SERVICE : rappels automatiques par SMS (TextBee)
 
     GSmartPetCare w;
     w.showMaximized();      // plein écran : la page des employés est large (tableau + fiche)

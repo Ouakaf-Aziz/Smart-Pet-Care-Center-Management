@@ -10,8 +10,9 @@
 #include <QTime>
 
 // Accès à la table Oracle RENDEZ_VOUS
-// (ID_RDV NUMBER, DATE_RDV DATE, HEURE VARCHAR2(5), TYPE_RDV, DUREE NUMBER, PRIORITE,
-//  SALLE, ID_ANIMAL -> ANIMAL, ID_EMPLOYEE -> EMPLOYEE)
+// (ID_RDV NUMBER, ID_EMPLOYE -> EMPLOYE.ID_EMPLOYR, ID_ANIMAL -> ANIMAL, DATE_RDV DATE,
+//  HEURE_RDV DATE (seule l'heure compte), TYPE_RDV, DUREE_RDV NUMBER, PRIORITE, SALLE,
+//  STATUT_RDV NOT NULL : "Planifié" à l'ajout, inchangé à la modification)
 class RendezVous
 {
 public:
@@ -28,8 +29,8 @@ public:
                  const QVariant &idAnimal = QVariant(),
                  const QVariant &idEmploye = QVariant());
 
-    // Chaque ligne : ID_RDV, PRIORITE, DUREE, TYPE_RDV, SALLE, HEURE (HH:mm),
-    //                DATE (dd/MM/yyyy), NOM de l'animal, ID_ANIMAL, ID_EMPLOYEE
+    // Chaque ligne : ID_RDV, PRIORITE, DUREE_RDV, TYPE_RDV, SALLE, HEURE_RDV (HH:mm),
+    //                DATE (dd/MM/yyyy), NOM_ANIMAL, ID_ANIMAL, ID_EMPLOYE
     QList<QStringList> afficher();
 
     bool modifier(int id,

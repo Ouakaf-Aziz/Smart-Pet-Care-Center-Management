@@ -25,8 +25,8 @@ Connection& Connection::createInstance()
 bool Connection::createConnection()
 {
     db.setDatabaseName("Source_Projet2A");   // ← nom de VOTRE source ODBC
-    db.setUserName("zeineb");               // ← votre utilisateur Oracle
-    db.setPassword("zeineb123");         // ← son mot de passe
+    db.setUserName("monuser");               // ← votre utilisateur Oracle
+    db.setPassword("Monpass2026");         // ← son mot de passe
 
     if (db.open()) {
         qDebug() << "Connexion établie";

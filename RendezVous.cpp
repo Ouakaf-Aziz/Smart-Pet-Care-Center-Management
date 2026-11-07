@@ -1,4 +1,5 @@
 #include "RendezVous.h"
+#include <QSqlDatabase>
 #include <QSqlQuery>
 #include <QSqlError>
 #include <QDateTime>
@@ -26,22 +27,25 @@ bool RendezVous::ajouter(int id, const QString &priorite, int duree,
 {
     QSqlQuery query;
 
-    // HEURE est un VARCHAR2(5) -> "HH:mm" (avec les secondes, Oracle refuse : ORA-12899)
-    // La date est passée en texte ISO puis convertie par TO_DATE : indépendant des réglages NLS.
+    // HEURE_RDV est une colonne DATE : on y stocke la date du rendez-vous + l'heure choisie
+    // (comme les lignes déjà présentes en base). Tout passe en texte ISO puis TO_DATE :
+    // indépendant des réglages NLS. STATUT_RDV est NOT NULL : "Planifié" par défaut.
     query.prepare("INSERT INTO RENDEZ_VOUS "
-                  "(ID_RDV, PRIORITE, DUREE, TYPE_RDV, SALLE, HEURE, DATE_RDV, ID_ANIMAL, ID_EMPLOYEE) "
-                  "VALUES (:id, :priorite, :duree, :type, :salle, :heure, "
-                  "TO_DATE(:date, 'YYYY-MM-DD'), :animal, :employe)");
+                  "(ID_RDV, ID_EMPLOYE, ID_ANIMAL, DATE_RDV, HEURE_RDV, TYPE_RDV, "
+                  "DUREE_RDV, PRIORITE, SALLE, STATUT_RDV) "
+                  "VALUES (:id, :employe, :animal, TO_DATE(:date, 'YYYY-MM-DD'), "
+                  "TO_DATE(:dateheure, 'YYYY-MM-DD HH24:MI'), :type, :duree, :priorite, :salle, :statut)");
 
     query.bindValue(":id", id);
     query.bindValue(":priorite", priorite);
     query.bindValue(":duree", duree);
     query.bindValue(":type", type);
     query.bindValue(":salle", salle);
-    query.bindValue(":heure", heure.toString("HH:mm"));
     query.bindValue(":date", date.toString("yyyy-MM-dd"));
+    query.bindValue(":dateheure", date.toString("yyyy-MM-dd") + " " + heure.toString("HH:mm"));
     query.bindValue(":animal", entierOuNull(idAnimal));
     query.bindValue(":employe", entierOuNull(idEmploye));
+    query.bindValue(":statut", QString::fromUtf8("Planifié"));
 
     if (query.exec())
         return true;
@@ -57,8 +61,8 @@ QList<QStringList> RendezVous::afficher()
     QList<QStringList> liste;
     QSqlQuery query;
 
-    if (!query.exec("SELECT r.ID_RDV, r.PRIORITE, r.DUREE, r.TYPE_RDV, r.SALLE, "
-                    "r.HEURE, r.DATE_RDV, a.NOM, r.ID_ANIMAL, r.ID_EMPLOYEE "
+    if (!query.exec("SELECT r.ID_RDV, r.PRIORITE, r.DUREE_RDV, r.TYPE_RDV, r.SALLE, "
+                    "r.HEURE_RDV, r.DATE_RDV, a.NOM_ANIMAL, r.ID_ANIMAL, r.ID_EMPLOYE "
                     "FROM RENDEZ_VOUS r LEFT JOIN ANIMAL a ON a.ID_ANIMAL = r.ID_ANIMAL "
                     "ORDER BY r.ID_RDV")) {
         derniereErreur = query.lastError().text();
@@ -67,7 +71,7 @@ QList<QStringList> RendezVous::afficher()
     }
 
     while (query.next()) {
-        // 0 ID_RDV, 1 PRIORITE, 2 DUREE, 3 TYPE_RDV, 4 SALLE, 5 HEURE, 6 DATE_RDV, 7 NOM, 8 ID_ANIMAL, 9 ID_EMPLOYEE
+        // 0 ID_RDV, 1 PRIORITE, 2 DUREE_RDV, 3 TYPE_RDV, 4 SALLE, 5 HEURE_RDV, 6 DATE_RDV, 7 NOM_ANIMAL, 8 ID_ANIMAL, 9 ID_EMPLOYE
         QDate d = query.value(6).toDate();
         if (!d.isValid())
             d = query.value(6).toDateTime().date();
@@ -78,7 +82,7 @@ QList<QStringList> RendezVous::afficher()
               << query.value(2).toString()
               << query.value(3).toString()
               << query.value(4).toString()
-              << query.value(5).toString()
+              << query.value(5).toDateTime().time().toString("HH:mm")   // HEURE_RDV est un DATE
               << d.toString("dd/MM/yyyy")
               << query.value(7).toString()
               << (query.value(8).isNull() ? QString() : query.value(8).toString())
@@ -97,17 +101,18 @@ bool RendezVous::modifier(int id, const QString &priorite, int duree,
     QSqlQuery query;
 
     query.prepare("UPDATE RENDEZ_VOUS SET "
-                  "PRIORITE = :priorite, DUREE = :duree, "
-                  "TYPE_RDV = :type, SALLE = :salle, HEURE = :heure, "
-                  "DATE_RDV = TO_DATE(:date, 'YYYY-MM-DD'), ID_ANIMAL = :animal, ID_EMPLOYEE = :employe "
+                  "PRIORITE = :priorite, DUREE_RDV = :duree, "
+                  "TYPE_RDV = :type, SALLE = :salle, "
+                  "HEURE_RDV = TO_DATE(:dateheure, 'YYYY-MM-DD HH24:MI'), "
+                  "DATE_RDV = TO_DATE(:date, 'YYYY-MM-DD'), ID_ANIMAL = :animal, ID_EMPLOYE = :employe "
                   "WHERE ID_RDV = :id");
 
     query.bindValue(":priorite", priorite);
     query.bindValue(":duree", duree);
     query.bindValue(":type", type);
     query.bindValue(":salle", salle);
-    query.bindValue(":heure", heure.toString("HH:mm"));
     query.bindValue(":date", date.toString("yyyy-MM-dd"));
+    query.bindValue(":dateheure", date.toString("yyyy-MM-dd") + " " + heure.toString("HH:mm"));
     query.bindValue(":animal", entierOuNull(idAnimal));
     query.bindValue(":employe", entierOuNull(idEmploye));
     query.bindValue(":id", id);
@@ -127,6 +132,21 @@ bool RendezVous::modifier(int id, const QString &priorite, int duree,
 // ==================== SUPPRIMER ====================
 bool RendezVous::supprimer(int id)
 {
+    // INCLURE référence RENDEZ_VOUS (INCLURE_FK1, sans ON DELETE CASCADE) : on retire d'abord
+    // les services du rendez-vous, puis le rendez-vous, dans une seule transaction.
+    QSqlDatabase db = QSqlDatabase::database();
+    const bool transaction = db.transaction();
+
+    QSqlQuery filles;
+    filles.prepare("DELETE FROM INCLURE WHERE ID_RDV = :id");
+    filles.bindValue(":id", id);
+    if (!filles.exec()) {
+        derniereErreur = filles.lastError().text();
+        qDebug() << "DELETE INCLURE (RDV) :" << derniereErreur;
+        if (transaction) db.rollback();
+        return false;
+    }
+
     QSqlQuery query;
     query.prepare("DELETE FROM RENDEZ_VOUS WHERE ID_RDV = :id");
     query.bindValue(":id", id);
@@ -134,10 +154,17 @@ bool RendezVous::supprimer(int id)
     if (!query.exec()) {
         derniereErreur = query.lastError().text();
         qDebug() << "DELETE RENDEZ_VOUS :" << derniereErreur;
+        if (transaction) db.rollback();
         return false;
     }
     if (query.numRowsAffected() == 0) {
         derniereErreur = "Rendez-vous introuvable.";
+        if (transaction) db.rollback();
+        return false;
+    }
+    if (transaction && !db.commit()) {
+        derniereErreur = db.lastError().text();
+        db.rollback();
         return false;
     }
     return true;
@@ -169,7 +196,7 @@ bool RendezVous::animalExiste(int id)
 bool RendezVous::employeExiste(int id)
 {
     QSqlQuery query;
-    query.prepare("SELECT COUNT(*) FROM EMPLOYEE WHERE ID_EMPLOYEE = :id");
+    query.prepare("SELECT COUNT(*) FROM EMPLOYE WHERE ID_EMPLOYR = :id");
     query.bindValue(":id", id);
     if (query.exec() && query.next())
         return query.value(0).toInt() > 0;
@@ -190,7 +217,7 @@ QList<QPair<int, QString>> RendezVous::listerAnimaux()
 {
     QList<QPair<int, QString>> liste;
     QSqlQuery query;
-    if (!query.exec("SELECT ID_ANIMAL, NOM FROM ANIMAL ORDER BY NOM")) {
+    if (!query.exec("SELECT ID_ANIMAL, NOM_ANIMAL FROM ANIMAL ORDER BY NOM_ANIMAL")) {
         derniereErreur = query.lastError().text();
         qDebug() << "SELECT ANIMAL :" << derniereErreur;
         return liste;

@@ -11,3 +11,19 @@ release/
 .qtcreator/
 *.pro.user
 *.pro.user.*
+
+# Fichiers temporaires et sauvegardes (guide d'intégration)
+*.autosave
+*.qbs.user
+*.creator.user
+*.log
+*.tmp
+*.bak
+*.swp
+.DS_Store
+
+# Secrets / état local du rappel SMS TextBee (module Service)
+sms.ini
+textbee.ini
+rappels_sms.ini
+rappels_sms.log
