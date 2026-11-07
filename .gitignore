@@ -11,3 +11,9 @@ release/
 .qtcreator/
 *.pro.user
 *.pro.user.*
+sms.ini
+
+# Secrets / état local TextBee
+textbee.ini
+rappels_sms.ini
+rappels_sms.log
