@@ -2,21 +2,21 @@
 #define GSMARTPETCARE_H
 
 #include <QMainWindow>
+#include <QStringList>
+#include <QVariant>
 
-#include "donneesemployes.h"
+#include "RendezVous.h"
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class GSmartPetCare; }
+class QComboBox;
+class QLineEdit;
+class QCheckBox;
 QT_END_NAMESPACE
 
-class GestionServices;
-class GestionRdv;
-class GestionAnimaux;
-class Connexion;
-class GestionEmployes;
-class StatistiquesEmployes;
-class Privileges;
-
+// Fenêtre principale : navigation entre les pages + page « Gestion des rendez-vous ».
+// Les autres pages (services, employés, animaux) sont seulement accessibles (interface du .ui),
+// leur fonctionnement a été retiré. Toutes les requêtes SQL des rendez-vous sont dans la classe RendezVous.
 class GSmartPetCare : public QMainWindow
 {
     Q_OBJECT
@@ -26,11 +26,11 @@ public:
     ~GSmartPetCare();
 
 private slots:
-    // Connexion réussie (email + mot de passe, ou reconnaissance faciale) : ouvre l'accueil
-    void onConnecte(int employeId);
-    // Pages du module employés
-    void afficherStatistiquesEmployes(bool voirSalaires);
-    void afficherPrivileges();
+    // ----- Page « Gestion des rendez-vous » -----
+    void enregistrerRdv();        // bouton « Enregistrer » / « Mettre à jour »
+    void annulerRdv();            // bouton « Annuler » : abandonne la saisie ou la modification
+    void afficherStatistiques();  // bouton « Statistiques »
+    void exporterPdf();           // bouton « Exporter PDF »
 
 private:
     Ui::GSmartPetCare *ui;
@@ -48,22 +48,33 @@ private:
     // Affiche une page du contenu et met en surbrillance le bouton du menu correspondant
     void afficherContenu(int index);
 
-    // Logique de la page « Gestion des services » (widgets définis dans le .ui)
-    GestionServices *gestionServices = nullptr;
+    // ----- Page « Gestion des rendez-vous » -----
+    void initialiserRdv();
+    void configurerTableau();
+    void ajouterChampsManquants(); // crée « Animal » et « ID employé » dans le formulaire s'ils n'existent pas
+    void chargerDepuisBase();      // remplit le tableau avec la table RENDEZ_VOUS
+    void remplirComboAnimaux();    // liste déroulante « Animal » depuis la table ANIMAL
+    void rafraichirRdv();          // relit les animaux et les rendez-vous depuis la base
+    QVariant idAnimalSaisi() const;
+    QVariant idEmployeSaisi() const;
+    static int idNumerique(const QString &texte);   // « RDV008 » -> 8
+    void remplirLigne(int row, const QStringList &valeurs);
+    void ajouterBoutonsAction(int row);
+    void modifierLigne(int row);   // charge la ligne dans le formulaire
+    void supprimerLigne(int row);
+    void nouveauFormulaire();      // formulaire vide, mode « Ajouter »
+    bool genererPdf(const QString &chemin);
 
-    // Logique de la page « Gestion des rendez-vous » (widgets définis dans le même .ui)
-    GestionRdv *gestionRdv = nullptr;
-
-    // Logique de la page « Gestion des animaux » (page pageAnimaux, même .ui). Fournit la liste des
-    // animaux au module Services (historique des services rendus).
-    GestionAnimaux *m_animaux = nullptr;
-
-    // ----- Module employés (pages pageEmployes, pageStatsEmployes, pagePrivileges, pageVisage du même .ui) -----
-    BaseEmployes m_baseEmployes;                 // employés en mémoire (+ visages enregistrés)
-    Connexion *m_connexion = nullptr;            // authentification des employés
-    GestionEmployes *m_employes = nullptr;       // gestion des employés (CRUD, tri, recherche, PDF)
-    StatistiquesEmployes *m_statsEmployes = nullptr;
-    Privileges *m_privileges = nullptr;          // rôles et privilèges (consultation)
+    RendezVous m_rdv;                 // accès à la base de données (toutes les requêtes SQL)
+    int m_ligneEnModification = -1;   // -1 = mode « Ajouter »
+    int m_colIdEmploye = -1;          // colonne « id employe »
+    int m_colIdAnimal  = -1;          // colonne « Id animal »
+    int m_colAnimal = -1;             // colonne « Animal » du tableau (-1 si absente)
+    int m_colAction = 7;              // colonne « Actions » (toujours la dernière)
+    QComboBox *m_comboAnimal = nullptr;
+    QLineEdit *m_editIdAnimal = nullptr;
+    QLineEdit *m_editIdEmploye = nullptr;
+    QCheckBox *m_checkEmail  = nullptr;
 };
 
 #endif // GSMARTPETCARE_H

@@ -21,7 +21,7 @@
   </property>
   <property name="styleSheet">
    <string notr="true">QWidget {
-    font-family: "Arial";
+    font-family: &quot;Arial&quot;;
     font-size: 11pt;
     color: #1F2A37;
 }
@@ -96,7 +96,7 @@ QLineEdit:focus {
     border: none;
     border-left: 4px solid transparent;
 }
-#btnNavAccueil[actif="true"], #btnNavServices[actif="true"], #btnNavEmployes[actif="true"], #btnNavRDV[actif="true"], #btnNavAnimaux[actif="true"] {
+#btnNavAccueil[actif=&quot;true&quot;], #btnNavServices[actif=&quot;true&quot;], #btnNavEmployes[actif=&quot;true&quot;], #btnNavRDV[actif=&quot;true&quot;], #btnNavAnimaux[actif=&quot;true&quot;] {
     background-color: #0B5B55;
     color: #FFFFFF;
     border-left: 4px solid #F28C28;
@@ -180,7 +180,7 @@ QLineEdit:focus {
     <item>
      <widget class="QStackedWidget" name="stackedWidget">
       <property name="currentIndex">
-       <number>0</number>
+       <number>1</number>
       </property>
       <widget class="QWidget" name="pageLogin">
        <layout class="QVBoxLayout" name="verticalLayoutLogin">
@@ -257,7 +257,7 @@ QLineEdit:focus {
                 </size>
                </property>
                <property name="text">
-                <string />
+                <string/>
                </property>
                <property name="pixmap">
                 <pixmap resource="resources.qrc">:/images/logo_app.png</pixmap>
@@ -342,7 +342,7 @@ QLineEdit:focus {
                 <bool>false</bool>
                </property>
                <property name="text">
-                <string />
+                <string/>
                </property>
                <property name="alignment">
                 <set>Qt::AlignmentFlag::AlignCenter</set>
@@ -724,10 +724,7 @@ QLineEdit:focus {
               </item>
               <item>
                <layout class="QGridLayout" name="gridLayoutModules">
-                <property name="horizontalSpacing">
-                 <number>20</number>
-                </property>
-                <property name="verticalSpacing">
+                <property name="spacing">
                  <number>20</number>
                 </property>
                 <item row="0" column="0">
@@ -1171,6 +1168,14 @@ QLineEdit:focus {
               <bool>true</bool>
              </property>
              <widget class="QWidget" name="pageServices">
+              <property name="geometry">
+               <rect>
+                <x>0</x>
+                <y>0</y>
+                <width>1000</width>
+                <height>647</height>
+               </rect>
+              </property>
               <property name="minimumSize">
                <size>
                 <width>1000</width>
@@ -1179,7 +1184,7 @@ QLineEdit:focus {
               </property>
               <property name="styleSheet">
                <string notr="true">QWidget {
-            font-family: "Arial";
+            font-family: &quot;Arial&quot;;
             font-size: 11pt;
             color: #1F2A37;
         }
@@ -1579,20 +1584,20 @@ QLineEdit:focus {
                      <property name="sortingEnabled">
                       <bool>false</bool>
                      </property>
-                     <attribute name="horizontalHeaderDefaultSectionSize">
-                      <number>120</number>
-                     </attribute>
                      <attribute name="horizontalHeaderMinimumSectionSize">
                       <number>50</number>
+                     </attribute>
+                     <attribute name="horizontalHeaderDefaultSectionSize">
+                      <number>120</number>
                      </attribute>
                      <attribute name="horizontalHeaderStretchLastSection">
                       <bool>true</bool>
                      </attribute>
-                     <attribute name="verticalHeaderDefaultSectionSize">
-                      <number>46</number>
-                     </attribute>
                      <attribute name="verticalHeaderVisible">
                       <bool>false</bool>
+                     </attribute>
+                     <attribute name="verticalHeaderDefaultSectionSize">
+                      <number>46</number>
                      </attribute>
                      <column>
                       <property name="text">
@@ -1955,6 +1960,14 @@ QLineEdit:focus {
               <bool>true</bool>
              </property>
              <widget class="QWidget" name="pageRDV">
+              <property name="geometry">
+               <rect>
+                <x>0</x>
+                <y>0</y>
+                <width>1100</width>
+                <height>670</height>
+               </rect>
+              </property>
               <property name="minimumSize">
                <size>
                 <width>1100</width>
@@ -1963,7 +1976,7 @@ QLineEdit:focus {
               </property>
               <property name="styleSheet">
                <string notr="true">QWidget {
-            font-family: "Arial";
+            font-family: &quot;Arial&quot;;
             font-size: 11pt;
             color: #1F2A37;
         }
@@ -2101,7 +2114,7 @@ QLineEdit:focus {
             font-weight: bold;
             color: #0B4F4A;
         }
-        #labelChampIdRdv, #labelChampDateRdv, #labelChampHeureRdv, #labelChampTypeRdv, #labelChampDureeRdv, #labelChampPrioriteRdv, #labelChampSalleRdv, #labelChampStatutRdv {
+        #labelChampIdRdv, #labelChampDateRdv, #labelChampHeureRdv, #labelChampTypeRdv, #labelChampDureeRdv, #labelChampPrioriteRdv, #labelChampSalleRdv, #labelChampIdAnimalRdv {
             font-size: 9pt;
             font-weight: bold;
             color: #6B7A78;
@@ -2135,7 +2148,7 @@ QLineEdit:focus {
         }
         #pushButtonConfirmerRdv:hover { background-color: #E07B16; }
         #labelChampIdRdv, #labelChampDateRdv, #labelChampHeureRdv, #labelChampTypeRdv,
-        #labelChampDureeRdv, #labelChampPrioriteRdv, #labelChampSalleRdv, #labelChampStatutRdv {
+        #labelChampDureeRdv, #labelChampPrioriteRdv, #labelChampSalleRdv, #labelChampIdAnimalRdv {
             padding-top: 8px;
         }
         QDateEdit::drop-down {
@@ -2264,31 +2277,6 @@ QLineEdit:focus {
                    </item>
                   </widget>
                  </item>
-                 <item>
-                  <widget class="QComboBox" name="comboBoxFiltreStatutRdv">
-                   <property name="minimumSize">
-                    <size>
-                     <width>0</width>
-                     <height>36</height>
-                    </size>
-                   </property>
-                   <item>
-                    <property name="text">
-                     <string>Statut : Tous</string>
-                    </property>
-                   </item>
-                   <item>
-                    <property name="text">
-                     <string>Statut : confirmé</string>
-                    </property>
-                   </item>
-                   <item>
-                    <property name="text">
-                     <string>Statut : annulé</string>
-                    </property>
-                   </item>
-                  </widget>
-                 </item>
                 </layout>
                </item>
                <item>
@@ -2400,29 +2388,24 @@ QLineEdit:focus {
                    <property name="sortingEnabled">
                     <bool>false</bool>
                    </property>
-                   <attribute name="horizontalHeaderDefaultSectionSize">
-                    <number>100</number>
-                   </attribute>
                    <attribute name="horizontalHeaderMinimumSectionSize">
                     <number>40</number>
                    </attribute>
+                   <attribute name="horizontalHeaderDefaultSectionSize">
+                    <number>100</number>
+                   </attribute>
                    <attribute name="horizontalHeaderStretchLastSection">
+                    <bool>false</bool>
+                   </attribute>
+                   <attribute name="verticalHeaderVisible">
                     <bool>false</bool>
                    </attribute>
                    <attribute name="verticalHeaderDefaultSectionSize">
                     <number>46</number>
                    </attribute>
-                   <attribute name="verticalHeaderVisible">
-                    <bool>false</bool>
-                   </attribute>
                    <column>
                     <property name="text">
                      <string>Id</string>
-                    </property>
-                   </column>
-                   <column>
-                    <property name="text">
-                     <string>Statut</string>
                     </property>
                    </column>
                    <column>
@@ -2457,6 +2440,21 @@ QLineEdit:focus {
                    </column>
                    <column>
                     <property name="text">
+                     <string>Animal</string>
+                    </property>
+                   </column>
+                   <column>
+                    <property name="text">
+                     <string>id employe</string>
+                    </property>
+                   </column>
+                   <column>
+                    <property name="text">
+                     <string>Id animal</string>
+                    </property>
+                   </column>
+                   <column>
+                    <property name="text">
                      <string>Actions</string>
                     </property>
                    </column>
@@ -2476,7 +2474,7 @@ QLineEdit:focus {
                      <height>16777215</height>
                     </size>
                    </property>
-                   <layout class="QVBoxLayout" name="verticalLayoutDetailRdv" stretch="0,0,1,0">
+                   <layout class="QVBoxLayout" name="verticalLayoutDetailRdv" stretch="0,0,0,0,1,0">
                     <property name="spacing">
                      <number>8</number>
                     </property>
@@ -2507,80 +2505,10 @@ QLineEdit:focus {
                       <property name="verticalSpacing">
                        <number>4</number>
                       </property>
-                      <item row="0" column="0" colspan="2">
-                       <widget class="QLabel" name="labelChampIdRdv">
+                      <item row="6" column="0">
+                       <widget class="QLabel" name="labelChampPrioriteRdv">
                         <property name="text">
-                         <string>ID RDV</string>
-                        </property>
-                       </widget>
-                      </item>
-                      <item row="1" column="0" colspan="2">
-                       <widget class="QLineEdit" name="lineEditIdRdv">
-                        <property name="minimumSize">
-                         <size>
-                          <width>0</width>
-                          <height>34</height>
-                         </size>
-                        </property>
-                        <property name="placeholderText">
-                         <string>ex. RDV008</string>
-                        </property>
-                       </widget>
-                      </item>
-                      <item row="2" column="0">
-                       <widget class="QLabel" name="labelChampDateRdv">
-                        <property name="text">
-                         <string>DATE</string>
-                        </property>
-                       </widget>
-                      </item>
-                      <item row="2" column="1">
-                       <widget class="QLabel" name="labelChampHeureRdv">
-                        <property name="text">
-                         <string>HEURE</string>
-                        </property>
-                       </widget>
-                      </item>
-                      <item row="3" column="0">
-                       <widget class="QDateEdit" name="dateEditRdv">
-                        <property name="minimumSize">
-                         <size>
-                          <width>0</width>
-                          <height>34</height>
-                         </size>
-                        </property>
-                        <property name="calendarPopup">
-                         <bool>true</bool>
-                        </property>
-                        <property name="displayFormat">
-                         <string>dd/MM/yyyy</string>
-                        </property>
-                       </widget>
-                      </item>
-                      <item row="3" column="1">
-                       <widget class="QTimeEdit" name="timeEditRdv">
-                        <property name="minimumSize">
-                         <size>
-                          <width>0</width>
-                          <height>34</height>
-                         </size>
-                        </property>
-                        <property name="displayFormat">
-                         <string>HH:mm</string>
-                        </property>
-                       </widget>
-                      </item>
-                      <item row="4" column="0">
-                       <widget class="QLabel" name="labelChampTypeRdv">
-                        <property name="text">
-                         <string>TYPE</string>
-                        </property>
-                       </widget>
-                      </item>
-                      <item row="4" column="1">
-                       <widget class="QLabel" name="labelChampDureeRdv">
-                        <property name="text">
-                         <string>DURÉE (MIN)</string>
+                         <string>PRIORITÉ</string>
                         </property>
                        </widget>
                       </item>
@@ -2614,23 +2542,10 @@ QLineEdit:focus {
                         </item>
                        </widget>
                       </item>
-                      <item row="5" column="1">
-                       <widget class="QSpinBox" name="spinBoxDureeRdv">
-                        <property name="minimumSize">
-                         <size>
-                          <width>0</width>
-                          <height>34</height>
-                         </size>
-                        </property>
-                        <property name="maximum">
-                         <number>600</number>
-                        </property>
-                       </widget>
-                      </item>
-                      <item row="6" column="0">
-                       <widget class="QLabel" name="labelChampPrioriteRdv">
+                      <item row="4" column="1">
+                       <widget class="QLabel" name="labelChampDureeRdv">
                         <property name="text">
-                         <string>PRIORITÉ</string>
+                         <string>DURÉE (MIN)</string>
                         </property>
                        </widget>
                       </item>
@@ -2638,6 +2553,13 @@ QLineEdit:focus {
                        <widget class="QLabel" name="labelChampSalleRdv">
                         <property name="text">
                          <string>SALLE</string>
+                        </property>
+                       </widget>
+                      </item>
+                      <item row="2" column="0">
+                       <widget class="QLabel" name="labelChampDateRdv">
+                        <property name="text">
+                         <string>DATE</string>
                         </property>
                        </widget>
                       </item>
@@ -2661,9 +2583,72 @@ QLineEdit:focus {
                         </item>
                         <item>
                          <property name="text">
-                          <string />
+                          <string/>
                          </property>
                         </item>
+                       </widget>
+                      </item>
+                      <item row="3" column="0">
+                       <widget class="QDateEdit" name="dateEditRdv">
+                        <property name="minimumSize">
+                         <size>
+                          <width>0</width>
+                          <height>34</height>
+                         </size>
+                        </property>
+                        <property name="displayFormat">
+                         <string>dd/MM/yyyy</string>
+                        </property>
+                        <property name="calendarPopup">
+                         <bool>true</bool>
+                        </property>
+                       </widget>
+                      </item>
+                      <item row="1" column="0" colspan="2">
+                       <widget class="QLineEdit" name="lineEditIdRdv">
+                        <property name="minimumSize">
+                         <size>
+                          <width>0</width>
+                          <height>34</height>
+                         </size>
+                        </property>
+                        <property name="placeholderText">
+                         <string>ex. RDV008</string>
+                        </property>
+                       </widget>
+                      </item>
+                      <item row="0" column="0" colspan="2">
+                       <widget class="QLabel" name="labelChampIdRdv">
+                        <property name="text">
+                         <string>ID RDV</string>
+                        </property>
+                       </widget>
+                      </item>
+                      <item row="4" column="0">
+                       <widget class="QLabel" name="labelChampTypeRdv">
+                        <property name="text">
+                         <string>TYPE</string>
+                        </property>
+                       </widget>
+                      </item>
+                      <item row="3" column="1">
+                       <widget class="QTimeEdit" name="timeEditRdv">
+                        <property name="minimumSize">
+                         <size>
+                          <width>0</width>
+                          <height>34</height>
+                         </size>
+                        </property>
+                        <property name="displayFormat">
+                         <string>HH:mm</string>
+                        </property>
+                       </widget>
+                      </item>
+                      <item row="2" column="1">
+                       <widget class="QLabel" name="labelChampHeureRdv">
+                        <property name="text">
+                         <string>HEURE</string>
+                        </property>
                        </widget>
                       </item>
                       <item row="7" column="1">
@@ -2686,41 +2671,40 @@ QLineEdit:focus {
                         </item>
                        </widget>
                       </item>
-                      <item row="8" column="0" colspan="2">
-                       <widget class="QLabel" name="labelChampStatutRdv">
-                        <property name="text">
-                         <string>STATUT</string>
-                        </property>
-                       </widget>
-                      </item>
-                      <item row="9" column="0" colspan="2">
-                       <widget class="QComboBox" name="comboBoxStatutRdv">
+                      <item row="5" column="1">
+                       <widget class="QSpinBox" name="spinBoxDureeRdv">
                         <property name="minimumSize">
                          <size>
                           <width>0</width>
                           <height>34</height>
                          </size>
                         </property>
-                        <item>
-                         <property name="text">
-                          <string>confirmé</string>
-                         </property>
-                        </item>
-                        <item>
-                         <property name="text">
-                          <string>annulé</string>
-                         </property>
-                        </item>
-                       </widget>
-                      </item>
-                      <item row="10" column="0" colspan="2">
-                       <widget class="QCheckBox" name="checkBoxEmailRdv">
-                        <property name="text">
-                         <string>Confirmation automatique par e-mail</string>
+                        <property name="maximum">
+                         <number>600</number>
                         </property>
                        </widget>
                       </item>
                      </layout>
+                    </item>
+                    <item>
+                     <widget class="QLabel" name="labelChampIdAnimalRdv">
+                      <property name="text">
+                       <string>ID ANIMAL</string>
+                      </property>
+                     </widget>
+                    </item>
+                    <item>
+                     <widget class="QLineEdit" name="lineEditIdAnimalRdv">
+                      <property name="minimumSize">
+                       <size>
+                        <width>0</width>
+                        <height>34</height>
+                       </size>
+                      </property>
+                      <property name="placeholderText">
+                       <string>ex. 3</string>
+                      </property>
+                     </widget>
                     </item>
                     <item>
                      <spacer name="spacerDetailRdv">
@@ -2790,6 +2774,14 @@ QLineEdit:focus {
               <bool>true</bool>
              </property>
              <widget class="QWidget" name="pageEmployes">
+              <property name="geometry">
+               <rect>
+                <x>0</x>
+                <y>0</y>
+                <width>1290</width>
+                <height>802</height>
+               </rect>
+              </property>
               <property name="minimumSize">
                <size>
                 <width>1290</width>
@@ -2800,7 +2792,7 @@ QLineEdit:focus {
                <string>Gestion des employés</string>
               </property>
               <property name="styleSheet">
-               <string notr="true">QWidget { font-family: "Arial"; font-size: 11pt; color: #1F2A37; }
+               <string notr="true">QWidget { font-family: &quot;Arial&quot;; font-size: 11pt; color: #1F2A37; }
           #pageEmployes { background-color: #F4F8F7; }
           #labelTitrePageEmp { font-size: 20pt; font-weight: bold; color: #0F766E; }
           #labelUtilisateur { color: #1F2A37; }
@@ -2859,6 +2851,9 @@ QLineEdit:focus {
           </string>
               </property>
               <layout class="QVBoxLayout" name="layoutEmployes" stretch="0,0,0,1">
+               <property name="spacing">
+                <number>12</number>
+               </property>
                <property name="leftMargin">
                 <number>28</number>
                </property>
@@ -2870,9 +2865,6 @@ QLineEdit:focus {
                </property>
                <property name="bottomMargin">
                 <number>22</number>
-               </property>
-               <property name="spacing">
-                <number>12</number>
                </property>
                <item>
                 <layout class="QHBoxLayout" name="layoutEntete">
@@ -2886,7 +2878,7 @@ QLineEdit:focus {
                  <item>
                   <spacer name="spacerEnteteEmp">
                    <property name="orientation">
-                    <enum>Qt::Horizontal</enum>
+                    <enum>Qt::Orientation::Horizontal</enum>
                    </property>
                    <property name="sizeHint" stdset="0">
                     <size>
@@ -2899,7 +2891,7 @@ QLineEdit:focus {
                  <item>
                   <widget class="QLabel" name="labelUtilisateur">
                    <property name="text">
-                    <string />
+                    <string/>
                    </property>
                   </widget>
                  </item>
@@ -3011,48 +3003,48 @@ QLineEdit:focus {
                  </property>
                  <item>
                   <widget class="QPushButton" name="btnAjouter">
-                   <property name="text">
-                    <string>Ajouter un employé</string>
-                   </property>
                    <property name="cursor">
                     <cursorShape>PointingHandCursor</cursorShape>
+                   </property>
+                   <property name="text">
+                    <string>Ajouter un employé</string>
                    </property>
                   </widget>
                  </item>
                  <item>
                   <widget class="QPushButton" name="btnPdf">
-                   <property name="text">
-                    <string>Exporter PDF</string>
-                   </property>
                    <property name="cursor">
                     <cursorShape>PointingHandCursor</cursorShape>
+                   </property>
+                   <property name="text">
+                    <string>Exporter PDF</string>
                    </property>
                   </widget>
                  </item>
                  <item>
                   <widget class="QPushButton" name="btnStats">
-                   <property name="text">
-                    <string>Statistiques</string>
-                   </property>
                    <property name="cursor">
                     <cursorShape>PointingHandCursor</cursorShape>
+                   </property>
+                   <property name="text">
+                    <string>Statistiques</string>
                    </property>
                   </widget>
                  </item>
                  <item>
                   <widget class="QPushButton" name="btnPrivileges">
-                   <property name="text">
-                    <string>Rôles et privilèges</string>
-                   </property>
                    <property name="cursor">
                     <cursorShape>PointingHandCursor</cursorShape>
+                   </property>
+                   <property name="text">
+                    <string>Rôles et privilèges</string>
                    </property>
                   </widget>
                  </item>
                  <item>
                   <spacer name="spacerBoutonsEmp">
                    <property name="orientation">
-                    <enum>Qt::Horizontal</enum>
+                    <enum>Qt::Orientation::Horizontal</enum>
                    </property>
                    <property name="sizeHint" stdset="0">
                     <size>
@@ -3072,20 +3064,26 @@ QLineEdit:focus {
                  <item>
                   <widget class="QTableWidget" name="tableEmployes">
                    <property name="editTriggers">
-                    <set>QAbstractItemView::NoEditTriggers</set>
-                   </property>
-                   <property name="selectionMode">
-                    <enum>QAbstractItemView::SingleSelection</enum>
-                   </property>
-                   <property name="selectionBehavior">
-                    <enum>QAbstractItemView::SelectRows</enum>
+                    <set>QAbstractItemView::EditTrigger::NoEditTriggers</set>
                    </property>
                    <property name="alternatingRowColors">
                     <bool>true</bool>
                    </property>
+                   <property name="selectionMode">
+                    <enum>QAbstractItemView::SelectionMode::SingleSelection</enum>
+                   </property>
+                   <property name="selectionBehavior">
+                    <enum>QAbstractItemView::SelectionBehavior::SelectRows</enum>
+                   </property>
                    <property name="showGrid">
                     <bool>false</bool>
                    </property>
+                   <attribute name="verticalHeaderVisible">
+                    <bool>false</bool>
+                   </attribute>
+                   <attribute name="verticalHeaderDefaultSectionSize">
+                    <number>46</number>
+                   </attribute>
                    <column>
                     <property name="text">
                      <string>ID</string>
@@ -3131,12 +3129,6 @@ QLineEdit:focus {
                      <string>Actions</string>
                     </property>
                    </column>
-                   <attribute name="verticalHeaderVisible">
-                    <bool>false</bool>
-                   </attribute>
-                   <attribute name="verticalHeaderDefaultSectionSize">
-                    <number>46</number>
-                   </attribute>
                   </widget>
                  </item>
                  <item>
@@ -3154,6 +3146,9 @@ QLineEdit:focus {
                     </size>
                    </property>
                    <layout class="QVBoxLayout" name="layoutDetail">
+                    <property name="spacing">
+                     <number>10</number>
+                    </property>
                     <property name="leftMargin">
                      <number>20</number>
                     </property>
@@ -3166,9 +3161,6 @@ QLineEdit:focus {
                     <property name="bottomMargin">
                      <number>18</number>
                     </property>
-                    <property name="spacing">
-                     <number>10</number>
-                    </property>
                     <item>
                      <widget class="QLabel" name="labelDetailTitreEmp">
                       <property name="text">
@@ -3179,7 +3171,7 @@ QLineEdit:focus {
                     <item>
                      <layout class="QFormLayout" name="formLayout">
                       <property name="labelAlignment">
-                       <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+                       <set>Qt::AlignmentFlag::AlignLeading|Qt::AlignmentFlag::AlignLeft|Qt::AlignmentFlag::AlignVCenter</set>
                       </property>
                       <property name="verticalSpacing">
                        <number>8</number>
@@ -3209,7 +3201,7 @@ QLineEdit:focus {
                        </widget>
                       </item>
                       <item row="1" column="1">
-                       <widget class="QLineEdit" name="editNom" />
+                       <widget class="QLineEdit" name="editNom"/>
                       </item>
                       <item row="2" column="0">
                        <widget class="QLabel" name="labPrenom">
@@ -3219,7 +3211,7 @@ QLineEdit:focus {
                        </widget>
                       </item>
                       <item row="2" column="1">
-                       <widget class="QLineEdit" name="editPrenom" />
+                       <widget class="QLineEdit" name="editPrenom"/>
                       </item>
                       <item row="3" column="0">
                        <widget class="QLabel" name="labEmail">
@@ -3229,7 +3221,7 @@ QLineEdit:focus {
                        </widget>
                       </item>
                       <item row="3" column="1">
-                       <widget class="QLineEdit" name="editEmail" />
+                       <widget class="QLineEdit" name="editEmail"/>
                       </item>
                       <item row="4" column="0">
                        <widget class="QLabel" name="labAdresse">
@@ -3239,7 +3231,7 @@ QLineEdit:focus {
                        </widget>
                       </item>
                       <item row="4" column="1">
-                       <widget class="QLineEdit" name="editAdresse" />
+                       <widget class="QLineEdit" name="editAdresse"/>
                       </item>
                       <item row="5" column="0">
                        <widget class="QLabel" name="labTelephone">
@@ -3249,7 +3241,7 @@ QLineEdit:focus {
                        </widget>
                       </item>
                       <item row="5" column="1">
-                       <widget class="QLineEdit" name="editTelephone" />
+                       <widget class="QLineEdit" name="editTelephone"/>
                       </item>
                       <item row="6" column="0">
                        <widget class="QLabel" name="labSalaire">
@@ -3259,7 +3251,7 @@ QLineEdit:focus {
                        </widget>
                       </item>
                       <item row="6" column="1">
-                       <widget class="QLineEdit" name="editSalaire" />
+                       <widget class="QLineEdit" name="editSalaire"/>
                       </item>
                       <item row="7" column="0">
                        <widget class="QLabel" name="labDate">
@@ -3270,11 +3262,11 @@ QLineEdit:focus {
                       </item>
                       <item row="7" column="1">
                        <widget class="QDateEdit" name="dateEmbauche">
-                        <property name="calendarPopup">
-                         <bool>true</bool>
-                        </property>
                         <property name="displayFormat">
                          <string>dd/MM/yyyy</string>
+                        </property>
+                        <property name="calendarPopup">
+                         <bool>true</bool>
                         </property>
                        </widget>
                       </item>
@@ -3286,7 +3278,7 @@ QLineEdit:focus {
                        </widget>
                       </item>
                       <item row="8" column="1">
-                       <widget class="QComboBox" name="comboStatut" />
+                       <widget class="QComboBox" name="comboStatut"/>
                       </item>
                       <item row="9" column="0">
                        <widget class="QLabel" name="labPoste">
@@ -3296,7 +3288,7 @@ QLineEdit:focus {
                        </widget>
                       </item>
                       <item row="9" column="1">
-                       <widget class="QComboBox" name="comboPoste" />
+                       <widget class="QComboBox" name="comboPoste"/>
                       </item>
                       <item row="10" column="0">
                        <widget class="QLabel" name="labMdp">
@@ -3308,7 +3300,7 @@ QLineEdit:focus {
                       <item row="10" column="1">
                        <widget class="QLineEdit" name="editMdp">
                         <property name="echoMode">
-                         <enum>QLineEdit::Password</enum>
+                         <enum>QLineEdit::EchoMode::Password</enum>
                         </property>
                        </widget>
                       </item>
@@ -3317,7 +3309,7 @@ QLineEdit:focus {
                     <item>
                      <widget class="QLabel" name="labelVisage">
                       <property name="text">
-                       <string />
+                       <string/>
                       </property>
                      </widget>
                     </item>
@@ -3325,21 +3317,21 @@ QLineEdit:focus {
                      <layout class="QHBoxLayout" name="layoutVisage" stretch="1,0">
                       <item>
                        <widget class="QPushButton" name="btnVisage">
-                        <property name="text">
-                         <string>Enregistrer le visage</string>
-                        </property>
                         <property name="cursor">
                          <cursorShape>PointingHandCursor</cursorShape>
+                        </property>
+                        <property name="text">
+                         <string>Enregistrer le visage</string>
                         </property>
                        </widget>
                       </item>
                       <item>
                        <widget class="QPushButton" name="btnSupprVisage">
-                        <property name="text">
-                         <string>Retirer</string>
-                        </property>
                         <property name="cursor">
                          <cursorShape>PointingHandCursor</cursorShape>
+                        </property>
+                        <property name="text">
+                         <string>Retirer</string>
                         </property>
                        </widget>
                       </item>
@@ -3348,7 +3340,7 @@ QLineEdit:focus {
                     <item>
                      <spacer name="spacerDetailEmp">
                       <property name="orientation">
-                       <enum>Qt::Vertical</enum>
+                       <enum>Qt::Orientation::Vertical</enum>
                       </property>
                       <property name="sizeHint" stdset="0">
                        <size>
@@ -3362,21 +3354,21 @@ QLineEdit:focus {
                      <layout class="QHBoxLayout" name="layoutValider">
                       <item>
                        <widget class="QPushButton" name="btnEnregistrer">
-                        <property name="text">
-                         <string>Enregistrer</string>
-                        </property>
                         <property name="cursor">
                          <cursorShape>PointingHandCursor</cursorShape>
+                        </property>
+                        <property name="text">
+                         <string>Enregistrer</string>
                         </property>
                        </widget>
                       </item>
                       <item>
                        <widget class="QPushButton" name="btnAnnuler">
-                        <property name="text">
-                         <string>Annuler</string>
-                        </property>
                         <property name="cursor">
                          <cursorShape>PointingHandCursor</cursorShape>
+                        </property>
+                        <property name="text">
+                         <string>Annuler</string>
                         </property>
                        </widget>
                       </item>
@@ -3398,6 +3390,14 @@ QLineEdit:focus {
               <bool>true</bool>
              </property>
              <widget class="QWidget" name="pageStatsEmployes">
+              <property name="geometry">
+               <rect>
+                <x>0</x>
+                <y>0</y>
+                <width>1000</width>
+                <height>263</height>
+               </rect>
+              </property>
               <property name="minimumSize">
                <size>
                 <width>1000</width>
@@ -3409,7 +3409,7 @@ QLineEdit:focus {
               </property>
               <property name="styleSheet">
                <string notr="true">#pageStatsEmployes { background-color: #F4F8F7; }
-          QWidget { font-family: "Arial"; font-size: 11pt; color: #1F2A37; }
+          QWidget { font-family: &quot;Arial&quot;; font-size: 11pt; color: #1F2A37; }
           #carteStatut, #cartePoste, #carteSalaire, #carteRecrutement { background-color: #FFFFFF; border: 1px solid #CBD5D3; border-radius: 12px; }
           #titrePage { font-size: 20pt; font-weight: bold; color: #0F766E; }
           #titreStatut, #titrePoste, #titreSalaire, #titreRecrutement { color: #0F766E; }
@@ -3419,6 +3419,9 @@ QLineEdit:focus {
           </string>
               </property>
               <layout class="QVBoxLayout" name="layoutStats" stretch="0,1">
+               <property name="spacing">
+                <number>14</number>
+               </property>
                <property name="leftMargin">
                 <number>28</number>
                </property>
@@ -3430,9 +3433,6 @@ QLineEdit:focus {
                </property>
                <property name="bottomMargin">
                 <number>24</number>
-               </property>
-               <property name="spacing">
-                <number>14</number>
                </property>
                <item>
                 <layout class="QHBoxLayout" name="layoutEnteteStats">
@@ -3446,7 +3446,7 @@ QLineEdit:focus {
                  <item>
                   <spacer name="spacerEnteteStats">
                    <property name="orientation">
-                    <enum>Qt::Horizontal</enum>
+                    <enum>Qt::Orientation::Horizontal</enum>
                    </property>
                    <property name="sizeHint" stdset="0">
                     <size>
@@ -3458,11 +3458,11 @@ QLineEdit:focus {
                  </item>
                  <item>
                   <widget class="QPushButton" name="btnRetourStats">
-                   <property name="text">
-                    <string>Retour</string>
-                   </property>
                    <property name="cursor">
                     <cursorShape>PointingHandCursor</cursorShape>
+                   </property>
+                   <property name="text">
+                    <string>Retour</string>
                    </property>
                   </widget>
                  </item>
@@ -3470,15 +3470,15 @@ QLineEdit:focus {
                </item>
                <item>
                 <layout class="QGridLayout" name="gridCartes" rowstretch="1,1" columnstretch="1,1">
-                 <property name="horizontalSpacing">
-                  <number>18</number>
-                 </property>
-                 <property name="verticalSpacing">
+                 <property name="spacing">
                   <number>18</number>
                  </property>
                  <item row="0" column="0">
                   <widget class="QFrame" name="carteStatut">
                    <layout class="QVBoxLayout" name="layoutStatut" stretch="0,0,1">
+                    <property name="spacing">
+                     <number>4</number>
+                    </property>
                     <property name="leftMargin">
                      <number>18</number>
                     </property>
@@ -3490,9 +3490,6 @@ QLineEdit:focus {
                     </property>
                     <property name="bottomMargin">
                      <number>14</number>
-                    </property>
-                    <property name="spacing">
-                     <number>4</number>
                     </property>
                     <item>
                      <widget class="QLabel" name="titreStatut">
@@ -3509,7 +3506,7 @@ QLineEdit:focus {
                      </widget>
                     </item>
                     <item>
-                     <widget class="DonutChart" name="donutStatut" />
+                     <widget class="QWidget" name="donutStatut" native="true"/>
                     </item>
                    </layout>
                   </widget>
@@ -3517,6 +3514,9 @@ QLineEdit:focus {
                  <item row="0" column="1">
                   <widget class="QFrame" name="cartePoste">
                    <layout class="QVBoxLayout" name="layoutPoste" stretch="0,0,1">
+                    <property name="spacing">
+                     <number>4</number>
+                    </property>
                     <property name="leftMargin">
                      <number>18</number>
                     </property>
@@ -3528,9 +3528,6 @@ QLineEdit:focus {
                     </property>
                     <property name="bottomMargin">
                      <number>14</number>
-                    </property>
-                    <property name="spacing">
-                     <number>4</number>
                     </property>
                     <item>
                      <widget class="QLabel" name="titrePoste">
@@ -3547,7 +3544,7 @@ QLineEdit:focus {
                      </widget>
                     </item>
                     <item>
-                     <widget class="BarChart" name="barresPoste" />
+                     <widget class="QWidget" name="barresPoste" native="true"/>
                     </item>
                    </layout>
                   </widget>
@@ -3555,6 +3552,9 @@ QLineEdit:focus {
                  <item row="1" column="0">
                   <widget class="QFrame" name="carteSalaire">
                    <layout class="QVBoxLayout" name="layoutSalaire" stretch="0,0,1">
+                    <property name="spacing">
+                     <number>4</number>
+                    </property>
                     <property name="leftMargin">
                      <number>18</number>
                     </property>
@@ -3566,9 +3566,6 @@ QLineEdit:focus {
                     </property>
                     <property name="bottomMargin">
                      <number>14</number>
-                    </property>
-                    <property name="spacing">
-                     <number>4</number>
                     </property>
                     <item>
                      <widget class="QLabel" name="titreSalaire">
@@ -3585,7 +3582,7 @@ QLineEdit:focus {
                      </widget>
                     </item>
                     <item>
-                     <widget class="BarChart" name="barresSalaire" />
+                     <widget class="QWidget" name="barresSalaire" native="true"/>
                     </item>
                    </layout>
                   </widget>
@@ -3593,6 +3590,9 @@ QLineEdit:focus {
                  <item row="1" column="1">
                   <widget class="QFrame" name="carteRecrutement">
                    <layout class="QVBoxLayout" name="layoutRecrutement" stretch="0,0,1">
+                    <property name="spacing">
+                     <number>4</number>
+                    </property>
                     <property name="leftMargin">
                      <number>18</number>
                     </property>
@@ -3604,9 +3604,6 @@ QLineEdit:focus {
                     </property>
                     <property name="bottomMargin">
                      <number>14</number>
-                    </property>
-                    <property name="spacing">
-                     <number>4</number>
                     </property>
                     <item>
                      <widget class="QLabel" name="titreRecrutement">
@@ -3623,7 +3620,7 @@ QLineEdit:focus {
                      </widget>
                     </item>
                     <item>
-                     <widget class="LineChart" name="courbeRecrutement" />
+                     <widget class="QWidget" name="courbeRecrutement" native="true"/>
                     </item>
                    </layout>
                   </widget>
@@ -3641,6 +3638,14 @@ QLineEdit:focus {
               <bool>true</bool>
              </property>
              <widget class="QWidget" name="pagePrivileges">
+              <property name="geometry">
+               <rect>
+                <x>0</x>
+                <y>0</y>
+                <width>900</width>
+                <height>361</height>
+               </rect>
+              </property>
               <property name="minimumSize">
                <size>
                 <width>900</width>
@@ -3652,7 +3657,7 @@ QLineEdit:focus {
               </property>
               <property name="styleSheet">
                <string notr="true">#pagePrivileges { background-color: #F4F8F7; }
-          QWidget { font-family: "Arial"; font-size: 11pt; color: #1F2A37; }
+          QWidget { font-family: &quot;Arial&quot;; font-size: 11pt; color: #1F2A37; }
           #titre { font-size: 20pt; font-weight: bold; color: #0F766E; }
           #aide { color: #1F2A37; }
           QTableWidget { background-color: #FFFFFF; alternate-background-color: #F4F8F7; border: 1px solid #CBD5D3;
@@ -3667,6 +3672,9 @@ QLineEdit:focus {
           </string>
               </property>
               <layout class="QVBoxLayout" name="layoutPrivileges" stretch="0,0,1,0">
+               <property name="spacing">
+                <number>10</number>
+               </property>
                <property name="leftMargin">
                 <number>24</number>
                </property>
@@ -3678,9 +3686,6 @@ QLineEdit:focus {
                </property>
                <property name="bottomMargin">
                 <number>20</number>
-               </property>
-               <property name="spacing">
-                <number>10</number>
                </property>
                <item>
                 <widget class="QLabel" name="titre">
@@ -3702,17 +3707,23 @@ QLineEdit:focus {
                <item>
                 <widget class="QTableWidget" name="tableRoles">
                  <property name="editTriggers">
-                  <set>QAbstractItemView::NoEditTriggers</set>
-                 </property>
-                 <property name="selectionMode">
-                  <enum>QAbstractItemView::NoSelection</enum>
+                  <set>QAbstractItemView::EditTrigger::NoEditTriggers</set>
                  </property>
                  <property name="alternatingRowColors">
                   <bool>true</bool>
                  </property>
+                 <property name="selectionMode">
+                  <enum>QAbstractItemView::SelectionMode::NoSelection</enum>
+                 </property>
                  <property name="showGrid">
                   <bool>false</bool>
                  </property>
+                 <attribute name="verticalHeaderVisible">
+                  <bool>false</bool>
+                 </attribute>
+                 <attribute name="verticalHeaderDefaultSectionSize">
+                  <number>44</number>
+                 </attribute>
                  <column>
                   <property name="text">
                    <string>Rôle (poste)</string>
@@ -3771,12 +3782,6 @@ QLineEdit:focus {
                    <string>Ouvrir les statistiques</string>
                   </property>
                  </column>
-                 <attribute name="verticalHeaderVisible">
-                  <bool>false</bool>
-                 </attribute>
-                 <attribute name="verticalHeaderDefaultSectionSize">
-                  <number>44</number>
-                 </attribute>
                 </widget>
                </item>
                <item>
@@ -3784,7 +3789,7 @@ QLineEdit:focus {
                  <item>
                   <spacer name="spacerBoutonsPrivileges">
                    <property name="orientation">
-                    <enum>Qt::Horizontal</enum>
+                    <enum>Qt::Orientation::Horizontal</enum>
                    </property>
                    <property name="sizeHint" stdset="0">
                     <size>
@@ -3796,11 +3801,11 @@ QLineEdit:focus {
                  </item>
                  <item>
                   <widget class="QPushButton" name="btnAnnulerPrivileges">
-                   <property name="text">
-                    <string>Retour</string>
-                   </property>
                    <property name="cursor">
                     <cursorShape>PointingHandCursor</cursorShape>
+                   </property>
+                   <property name="text">
+                    <string>Retour</string>
                    </property>
                   </widget>
                  </item>
@@ -3817,6 +3822,14 @@ QLineEdit:focus {
               <bool>true</bool>
              </property>
              <widget class="QWidget" name="pageAnimaux">
+              <property name="geometry">
+               <rect>
+                <x>0</x>
+                <y>0</y>
+                <width>1100</width>
+                <height>887</height>
+               </rect>
+              </property>
               <property name="minimumSize">
                <size>
                 <width>1100</width>
@@ -3825,7 +3838,7 @@ QLineEdit:focus {
               </property>
               <property name="styleSheet">
                <string notr="true">QWidget {
-    font-family: "Arial";
+    font-family: &quot;Arial&quot;;
     font-size: 11pt;
     color: #1F2A37;
 }
@@ -4169,7 +4182,7 @@ QTableWidget::item:selected {
                  <item>
                   <spacer name="spacerBoutonsAnimal">
                    <property name="orientation">
-                    <enum>Qt::Horizontal</enum>
+                    <enum>Qt::Orientation::Horizontal</enum>
                    </property>
                    <property name="sizeHint" stdset="0">
                     <size>
@@ -4189,16 +4202,16 @@ QTableWidget::item:selected {
                  <item>
                   <widget class="QTableWidget" name="tableWidgetAnimaux">
                    <property name="editTriggers">
-                    <set>QAbstractItemView::NoEditTriggers</set>
+                    <set>QAbstractItemView::EditTrigger::NoEditTriggers</set>
                    </property>
                    <property name="alternatingRowColors">
                     <bool>true</bool>
                    </property>
                    <property name="selectionMode">
-                    <enum>QAbstractItemView::SingleSelection</enum>
+                    <enum>QAbstractItemView::SelectionMode::SingleSelection</enum>
                    </property>
                    <property name="selectionBehavior">
-                    <enum>QAbstractItemView::SelectRows</enum>
+                    <enum>QAbstractItemView::SelectionBehavior::SelectRows</enum>
                    </property>
                    <property name="showGrid">
                     <bool>true</bool>
@@ -4631,7 +4644,7 @@ QTableWidget::item:selected {
                     <item>
                      <spacer name="spacerDetailAnimal">
                       <property name="orientation">
-                       <enum>Qt::Vertical</enum>
+                       <enum>Qt::Orientation::Vertical</enum>
                       </property>
                       <property name="sizeHint" stdset="0">
                        <size>
@@ -4700,7 +4713,7 @@ QTableWidget::item:selected {
        </property>
        <property name="styleSheet">
         <string notr="true">#pageVisage { background-color: #F4F8F7; }
-QWidget { font-family: "Arial"; font-size: 11pt; color: #1F2A37; }
+QWidget { font-family: &quot;Arial&quot;; font-size: 11pt; color: #1F2A37; }
 #labelTitreVisage { font-size: 20pt; font-weight: bold; color: #0F766E; }
 #labelApercu { color: #F4F8F7; background-color: #1F2A37; border-radius: 8px; }
 #labelConsigne { color: #0F766E; }
@@ -4714,6 +4727,9 @@ QPushButton:hover { background-color: #E8F5F3; }
 </string>
        </property>
        <layout class="QVBoxLayout" name="layoutPageVisage">
+        <property name="spacing">
+         <number>10</number>
+        </property>
         <property name="leftMargin">
          <number>22</number>
         </property>
@@ -4725,9 +4741,6 @@ QPushButton:hover { background-color: #E8F5F3; }
         </property>
         <property name="bottomMargin">
          <number>18</number>
-        </property>
-        <property name="spacing">
-         <number>10</number>
         </property>
         <item>
          <widget class="QLabel" name="labelTitreVisage">
@@ -4748,20 +4761,20 @@ QPushButton:hover { background-color: #E8F5F3; }
            <string>Ouverture de la caméra...</string>
           </property>
           <property name="alignment">
-           <set>Qt::AlignCenter</set>
+           <set>Qt::AlignmentFlag::AlignCenter</set>
           </property>
          </widget>
         </item>
         <item>
          <widget class="QLabel" name="labelConsigne">
           <property name="text">
-           <string />
+           <string/>
+          </property>
+          <property name="alignment">
+           <set>Qt::AlignmentFlag::AlignCenter</set>
           </property>
           <property name="wordWrap">
            <bool>true</bool>
-          </property>
-          <property name="alignment">
-           <set>Qt::AlignCenter</set>
           </property>
          </widget>
         </item>
@@ -4786,7 +4799,7 @@ QPushButton:hover { background-color: #E8F5F3; }
           <item>
            <spacer name="spacerBoutonsVisage">
             <property name="orientation">
-             <enum>Qt::Horizontal</enum>
+             <enum>Qt::Orientation::Horizontal</enum>
             </property>
             <property name="sizeHint" stdset="0">
              <size>
@@ -4798,11 +4811,11 @@ QPushButton:hover { background-color: #E8F5F3; }
           </item>
           <item>
            <widget class="QPushButton" name="btnAnnulerVisage">
-            <property name="text">
-             <string>Annuler</string>
-            </property>
             <property name="cursor">
              <cursorShape>PointingHandCursor</cursorShape>
+            </property>
+            <property name="text">
+             <string>Annuler</string>
             </property>
            </widget>
           </item>
@@ -4815,28 +4828,8 @@ QPushButton:hover { background-color: #E8F5F3; }
    </layout>
   </widget>
  </widget>
- <customwidgets>
-  <customwidget>
-   <class>DonutChart</class>
-   <extends>QWidget</extends>
-   <header>donutchart.h</header>
-   <container>1</container>
-  </customwidget>
-  <customwidget>
-   <class>BarChart</class>
-   <extends>QWidget</extends>
-   <header>barchart.h</header>
-   <container>1</container>
-  </customwidget>
-  <customwidget>
-   <class>LineChart</class>
-   <extends>QWidget</extends>
-   <header>linechart.h</header>
-   <container>1</container>
-  </customwidget>
- </customwidgets>
  <resources>
-  <include location="resources.qrc" />
+  <include location="resources.qrc"/>
  </resources>
- <connections />
+ <connections/>
 </ui>
