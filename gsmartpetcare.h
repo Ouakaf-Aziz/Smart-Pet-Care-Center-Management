@@ -13,6 +13,7 @@
 #include "RendezVous.h"
 #include "service.h"
 #include "animal.h"
+#include "employe.h"
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class GSmartPetCare; }
@@ -56,8 +57,10 @@ private slots:
     // HistoriqueServices et StatistiquesServices (fin de ce fichier).
 
     // =======================================================================
-    // === MODULE EMPLOYÉ  (interface seulement : à intégrer) ================
-    // =======================================================================
+    // === MODULE EMPLOYÉ =====================================================
+    void onConnecte(int employeId);
+    void afficherStatistiquesEmployes(bool voirSalaires);
+    void afficherPrivileges();
 
     // =======================================================================
     // === MODULE ANIMAL ======================================================
@@ -75,6 +78,11 @@ private slots:
 
 private:
     Ui::GSmartPetCare *ui;
+    BaseEmployes m_baseEmployes;
+    Connexion *m_connexion = nullptr;
+    GestionEmployes *m_employes = nullptr;
+    StatistiquesEmployes *m_statsEmployes = nullptr;
+    Privileges *m_privileges = nullptr;
 
     // Indices des pages du QStackedWidget principal « stackedWidget » du .ui
     enum Page { PageLogin = 0, PageAccueil = 1, PageVisage = 2 };

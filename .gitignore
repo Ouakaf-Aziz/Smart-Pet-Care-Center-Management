@@ -1,13 +1,27 @@
 # Fichiers de compilation Qt
 build/
 **/build/
+build-*/
 debug/
 release/
 *.o
 *.obj
 *.exe
+*.dll
+*.a
+Makefile*
+.qmake.stash
+moc_*
+ui_*.h
+qrc_*.cpp
+*.autosave
 
 # Configuration personnelle Qt Creator
 .qtcreator/
 *.pro.user
-*.pro.user.*
+*.pro.user.*
+*.user
+
+# Modèles de reconnaissance faciale (gros fichiers : chacun les télécharge
+# avec models/telecharger_modeles.ps1)
+models/*.onnx

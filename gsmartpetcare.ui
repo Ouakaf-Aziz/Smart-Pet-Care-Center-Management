@@ -3504,7 +3504,7 @@ QLineEdit:focus {
                      </widget>
                     </item>
                     <item>
-                     <widget class="QWidget" name="donutStatut" native="true"/>
+                     <widget class="DonutChart" name="donutStatut"/>
                     </item>
                    </layout>
                   </widget>
@@ -3542,7 +3542,7 @@ QLineEdit:focus {
                      </widget>
                     </item>
                     <item>
-                     <widget class="QWidget" name="barresPoste" native="true"/>
+                     <widget class="BarChart" name="barresPoste"/>
                     </item>
                    </layout>
                   </widget>
@@ -3580,7 +3580,7 @@ QLineEdit:focus {
                      </widget>
                     </item>
                     <item>
-                     <widget class="QWidget" name="barresSalaire" native="true"/>
+                     <widget class="BarChart" name="barresSalaire"/>
                     </item>
                    </layout>
                   </widget>
@@ -3618,7 +3618,7 @@ QLineEdit:focus {
                      </widget>
                     </item>
                     <item>
-                     <widget class="QWidget" name="courbeRecrutement" native="true"/>
+                     <widget class="LineChart" name="courbeRecrutement"/>
                     </item>
                    </layout>
                   </widget>
@@ -5059,6 +5059,24 @@ QPushButton:hover { background-color: #E8F5F3; }
   </widget>
  </widget>
  <customwidgets>
+  <customwidget>
+   <class>DonutChart</class>
+   <extends>QWidget</extends>
+   <header>employe.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>BarChart</class>
+   <extends>QWidget</extends>
+   <header>employe.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>LineChart</class>
+   <extends>QWidget</extends>
+   <header>employe.h</header>
+   <container>1</container>
+  </customwidget>
   <customwidget>
    <class>GraphiqueService</class>
    <extends>QWidget</extends>

@@ -1,5 +1,6 @@
 #include "gsmartpetcare.h"
 #include "ui_gsmartpetcare.h"
+#include "employe.h"
 
 #include "animal.h"
 #include <QColor>
@@ -138,16 +139,32 @@ GSmartPetCare::GSmartPetCare(QWidget *parent)
     ombre->setColor(QColor(0, 0, 0, 45));
     ui->frameCard->setGraphicsEffect(ombre);
 
-    // Page de connexion : seulement l'interface (aucune vérification) -> le bouton ouvre l'accueil
+    // La connexion est gérée par le module Employés.
     ui->stackedWidget->setCurrentIndex(PageLogin);
     ui->lineEditIdentifiant->setFocus();
     connect(ui->lineEditIdentifiant, &QLineEdit::returnPressed,
             ui->lineEditMotDePasse, qOverload<>(&QWidget::setFocus));
     connect(ui->lineEditMotDePasse, &QLineEdit::returnPressed,
             ui->pushButtonConnexion, &QPushButton::click);
-    connect(ui->pushButtonConnexion, &QPushButton::clicked, this, [this]() {
-        afficherContenu(ContenuAccueil);
-        ui->stackedWidget->setCurrentIndex(PageAccueil);
+    chargerEmployesDemo(m_baseEmployes);
+    FaceAuth::chargerGabarits(m_baseEmployes);
+    FaceDialog::preparerPage(ui);
+    m_connexion = new Connexion(ui, m_baseEmployes, this);
+    m_employes = new GestionEmployes(ui, m_baseEmployes, this);
+    m_statsEmployes = new StatistiquesEmployes(ui, this);
+    m_privileges = new Privileges(ui, m_baseEmployes, this);
+
+    connect(m_connexion, &Connexion::connecte, this, &GSmartPetCare::onConnecte);
+    connect(m_connexion, &Connexion::abandon, this, &QWidget::close);
+    connect(m_employes, &GestionEmployes::statistiquesDemandees,
+            this, &GSmartPetCare::afficherStatistiquesEmployes);
+    connect(m_employes, &GestionEmployes::privilegesDemandes,
+            this, &GSmartPetCare::afficherPrivileges);
+    connect(m_statsEmployes, &StatistiquesEmployes::retour, this, [this]() {
+        afficherContenu(ContenuEmployes);
+    });
+    connect(m_privileges, &Privileges::termine, this, [this]() {
+        afficherContenu(ContenuEmployes);
     });
 
     // Modules intégrés (lisent et écrivent dans Oracle) :
@@ -183,6 +200,30 @@ GSmartPetCare::GSmartPetCare(QWidget *parent)
 GSmartPetCare::~GSmartPetCare()
 {
     delete ui;
+}
+
+void GSmartPetCare::onConnecte(int employeId)
+{
+    m_employes->setUtilisateur(employeId);
+    if (const Employe *employe = m_baseEmployes.trouver(employeId)) {
+        ui->labelBienvenue->setText(
+            QStringLiteral("Bienvenue %1 %2  -  Rôle : %3")
+                .arg(employe->prenom, employe->nom, employe->poste));
+    }
+    afficherContenu(ContenuAccueil);
+    ui->stackedWidget->setCurrentIndex(PageAccueil);
+}
+
+void GSmartPetCare::afficherStatistiquesEmployes(bool voirSalaires)
+{
+    m_statsEmployes->afficher(m_baseEmployes.employes, voirSalaires);
+    afficherContenu(ContenuStatsEmployes);
+}
+
+void GSmartPetCare::afficherPrivileges()
+{
+    m_privileges->ouvrir();
+    afficherContenu(ContenuPrivileges);
 }
 
 // ===========================================================================
