@@ -4,6 +4,7 @@
 #include <QDate>
 #include <QPair>
 #include <QString>
+#include <QVariantMap>
 #include <QVector>
 
 class QSqlQuery;
@@ -43,6 +44,12 @@ public:
                            const QString &espece, int tri, QString *erreur = nullptr);
     static bool obtenir(int id, Animal &animal, QString *erreur = nullptr);    // SELECT par id
     static int  prochainId();                                // MAX(ID_ANIMAL)+1
+
+    // ----- Recherche / statistiques pour l'historique des services rendus (module Service) -----
+    // Recherche par nom, espèce ou propriétaire (contient, insensible à la casse), triée par nom.
+    static QVector<Animal> rechercherParTexte(const QString &recherche);
+    // Nombre, total facturé et date du dernier service d'un animal (COUNT, SUM, MAX en SQL)
+    static QVariantMap statistiquesServices(int idAnimal);
 
     // ----- Comptages (chatbot) -----
     using Comptage = QVector<QPair<QString, int>>;           // (libellé, effectif)

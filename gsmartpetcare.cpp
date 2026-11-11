@@ -31,6 +31,7 @@
 #include <functional>
 #include <QHBoxLayout>
 #include <QHeaderView>
+#include <QResizeEvent>
 #include <QMessageBox>
 #include <QPageLayout>
 #include <QPageSize>
@@ -1377,20 +1378,20 @@ void HistoriqueServices::refreshAnimaux()
     const int idAvant = animalCourantId();
 
     // Recherche + tri par nom exécutés par Oracle
-    m_animaux = Service::rechercherAnimaux(ui->lineEditRechercheAnimalHisto->text());
+    m_animaux = Animal::rechercherParTexte(ui->lineEditRechercheAnimalHisto->text());
 
     {
         const QSignalBlocker blocker(ui->tableAnimauxHisto);
         ui->tableAnimauxHisto->setRowCount(m_animaux.size());
         int ligne = -1;
         for (int r = 0; r < m_animaux.size(); ++r) {
-            const Service &a = m_animaux[r];
-            auto *itNom = new QTableWidgetItem(a.getNomAnimal());
-            itNom->setData(Qt::UserRole, a.getIdAnimal());
+            const Animal &a = m_animaux[r];
+            auto *itNom = new QTableWidgetItem(a.nom);
+            itNom->setData(Qt::UserRole, a.id);
             ui->tableAnimauxHisto->setItem(r, 0, itNom);
-            ui->tableAnimauxHisto->setItem(r, 1, new QTableWidgetItem(a.getEspece()));
-            ui->tableAnimauxHisto->setItem(r, 2, new QTableWidgetItem(a.getProprietaire()));
-            if (a.getIdAnimal() == idAvant)
+            ui->tableAnimauxHisto->setItem(r, 1, new QTableWidgetItem(a.espece));
+            ui->tableAnimauxHisto->setItem(r, 2, new QTableWidgetItem(a.proprietaire));
+            if (a.id == idAvant)
                 ligne = r;
         }
         if (ligne < 0 && !m_animaux.isEmpty())
@@ -1405,7 +1406,7 @@ void HistoriqueServices::refreshAnimaux()
 
 void HistoriqueServices::refreshHistorique()
 {
-    const Service *a = trouverAnimal(animalCourantId());
+    const Animal *a = trouverAnimal(animalCourantId());
 
     {
         const QSignalBlocker blocker(ui->tableHistorique);
@@ -1422,13 +1423,13 @@ void HistoriqueServices::refreshHistorique()
         return;
     }
 
-    QString fiche = QString("%1 — %2").arg(a->getNomAnimal().toHtmlEscaped(), a->getEspece().toHtmlEscaped());
+    QString fiche = QString("%1 — %2").arg(a->nom.toHtmlEscaped(), a->espece.toHtmlEscaped());
     fiche += QString("<br><span style='font-size:10pt;font-weight:normal;color:#5C6B69;'>Propriétaire : %1</span>")
-                 .arg(a->getProprietaire().isEmpty() ? "—" : a->getProprietaire().toHtmlEscaped());
+                 .arg(a->proprietaire.isEmpty() ? "—" : a->proprietaire.toHtmlEscaped());
     ui->labelFicheHisto->setText(fiche);
 
     // Statistiques (COUNT / SUM / MAX en SQL) : elles ne dépendent pas du filtre
-    const QVariantMap st = Service::statistiquesAnimal(a->getIdAnimal());
+    const QVariantMap st = Animal::statistiquesServices(a->id);
 
     ui->labelNbServicesHisto->setText(QString("<span style='font-size:9pt;color:#6B7A78;'>SERVICES RENDUS</span><br><b style='font-size:16pt;color:#0B4F4A;'>%1</b>").arg(st.value("nombre").toInt()));
     ui->labelTotalHisto->setText(QString("<span style='font-size:9pt;color:#6B7A78;'>TOTAL FACTURÉ</span><br><b style='font-size:16pt;color:#0B4F4A;'>%1 DT</b>").arg(st.value("total").toDouble(), 0, 'f', 2));
@@ -1437,7 +1438,7 @@ void HistoriqueServices::refreshHistorique()
 
     // Filtre par type + tri exécutés par Oracle
     const QString typeFiltre = ui->comboFiltreTypeHisto->currentIndex() > 0 ? ui->comboFiltreTypeHisto->currentText() : QString();
-    m_rendus = Service::historiqueAnimal(a->getIdAnimal(), typeFiltre, ui->comboTriHisto->currentIndex());
+    m_rendus = Service::historiqueAnimal(a->id, typeFiltre, ui->comboTriHisto->currentIndex());
 
     {
         const QSignalBlocker blocker(ui->tableHistorique);
@@ -1445,8 +1446,8 @@ void HistoriqueServices::refreshHistorique()
         for (int ligne = 0; ligne < m_rendus.size(); ++ligne) {
             const Service &r = m_rendus[ligne];
 
-            auto *itDate = new QTableWidgetItem(formatDate(r.getDateRdv()));
-            itDate->setData(Qt::UserRole, r.getIdRdv());
+            auto *itDate = new QTableWidgetItem(formatDate(r.getRdv().getDateRdv()));
+            itDate->setData(Qt::UserRole, r.getRdv().getIdRdv());
             itDate->setData(Qt::UserRole + 1, r.getID());
             itDate->setTextAlignment(Qt::AlignCenter);
             auto *itPrix = new QTableWidgetItem(QString::number(r.getPrixApplique(), 'f', 2));
@@ -1517,7 +1518,7 @@ void HistoriqueServices::onAjouterRendu()
         return;
 
     // Ajout : le service est rattaché à l'un des rendez-vous de l'animal.
-    const QVector<Service> rdvs = Service::rendezVousAnimal(animalId);
+    const QVector<RendezVous> rdvs = RendezVous::rendezVousAnimal(animalId);
     if (rdvs.isEmpty()) {
         QMessageBox::information(m_fenetre, "Aucun rendez-vous",
                                  "Cet animal n'a aucun rendez-vous. Créez d'abord un rendez-vous "
@@ -1548,7 +1549,7 @@ void HistoriqueServices::onSupprimerRendu()
     }
     const QString texte = QString("Supprimer « %1 » du %2 de l'historique ?\n"
                                   "(le rendez-vous lui-même n'est pas supprimé)")
-                              .arg(r->getNom(), formatDate(r->getDateRdv()));
+                              .arg(r->getNom(), formatDate(r->getRdv().getDateRdv()));
     if (QMessageBox::question(m_fenetre, "Supprimer", texte) != QMessageBox::Yes)
         return;
 
@@ -1585,8 +1586,9 @@ void HistoriqueServices::onEnregistrerRendu()
 
     Service r = m_renduEnCours;
     if (!m_edition) {
-        r.setIdRdv(ui->comboRdv->currentData().toInt());
-        r.setDateRdv(QDate());
+        RendezVous rv;
+        rv.setIdRdv(ui->comboRdv->currentData().toInt());
+        r.setRdv(rv);
     }
     const int nouveauServiceId = ui->comboServiceRendu->currentData().toInt();
     if (const Service *s = trouverService(nouveauServiceId)) {
@@ -1622,13 +1624,13 @@ void HistoriqueServices::onServiceRenduChange()
 
 void HistoriqueServices::onExporterPdf()
 {
-    const Service *a = trouverAnimal(animalCourantId());
+    const Animal *a = trouverAnimal(animalCourantId());
     if (!a) {
         QMessageBox::information(m_fenetre, "Export PDF", "Sélectionnez d'abord un animal.");
         return;
     }
 
-    QString nomFichier = "historique_" + a->getNomAnimal();
+    QString nomFichier = "historique_" + a->nom;
     nomFichier.replace(' ', '_');
     QString chemin = QFileDialog::getSaveFileName(m_fenetre, "Exporter l'historique en PDF",
                                                   nomFichier + ".pdf", "Fichiers PDF (*.pdf)");
@@ -1638,7 +1640,7 @@ void HistoriqueServices::onExporterPdf()
         chemin += ".pdf";
 
     // Tous les services de l'animal, du plus récent au plus ancien (lus en base)
-    const QVector<Service> liste = Service::historiqueAnimal(a->getIdAnimal(), QString(), 0);
+    const QVector<Service> liste = Service::historiqueAnimal(a->id, QString(), 0);
 
     double total = 0.0;
     for (const Service &r : liste)
@@ -1648,9 +1650,9 @@ void HistoriqueServices::onExporterPdf()
                            "<p><b>Animal :</b> %1 (%2)<br>"
                            "<b>Propriétaire :</b> %3<br>"
                            "<b>Édité le :</b> %4</p>")
-                       .arg(a->getNomAnimal().toHtmlEscaped(),
-                            a->getEspece().toHtmlEscaped(),
-                            a->getProprietaire().isEmpty() ? QString("—") : a->getProprietaire().toHtmlEscaped(),
+                       .arg(a->nom.toHtmlEscaped(),
+                            a->espece.toHtmlEscaped(),
+                            a->proprietaire.isEmpty() ? QString("—") : a->proprietaire.toHtmlEscaped(),
                             formatDate(QDate::currentDate()));
 
     html += "<table border='1' cellspacing='0' cellpadding='5' width='100%'>"
@@ -1658,7 +1660,7 @@ void HistoriqueServices::onExporterPdf()
             "<th>Date</th><th>Service</th><th>Type</th><th>Prix (DT)</th><th>Remarque</th></tr>";
     for (const Service &r : liste) {
         html += QString("<tr><td>%1</td><td>%2</td><td>%3</td><td align='right'>%4</td><td>%5</td></tr>")
-                    .arg(formatDate(r.getDateRdv()),
+                    .arg(formatDate(r.getRdv().getDateRdv()),
                          r.getNom().toHtmlEscaped(),
                          r.getType().toHtmlEscaped(),
                          QString::number(r.getPrixApplique(), 'f', 2),
@@ -1703,9 +1705,9 @@ void HistoriqueServices::fermerSaisie()
 
 // r : nouveau service rendu (idRdv == 0) ou service rendu à modifier.
 // rdvs : rendez-vous proposés (ajout uniquement).
-void HistoriqueServices::ouvrirSaisie(const Service &r, const QVector<Service> &rdvs)
+void HistoriqueServices::ouvrirSaisie(const Service &r, const QVector<RendezVous> &rdvs)
 {
-    const bool edition = r.getIdRdv() > 0;
+    const bool edition = r.getRdv().getIdRdv() > 0;
 
     // Services proposés : uniquement les services disponibles
     {
@@ -1734,11 +1736,11 @@ void HistoriqueServices::ouvrirSaisie(const Service &r, const QVector<Service> &
     ui->formLayoutSaisieRendu->setRowVisible(ui->labelRdv, edition);
     ui->comboRdv->clear();
     if (edition) {
-        ui->labelRdv->setText(QString("RDV n°%1 — %2").arg(r.getIdRdv()).arg(formatDate(r.getDateRdv())));
+        ui->labelRdv->setText(QString("RDV n°%1 — %2").arg(r.getRdv().getIdRdv()).arg(formatDate(r.getRdv().getDateRdv())));
         ui->labelTitreSaisieRendu->setText("Modifier le service rendu");
         ui->lineEditPrixRendu->setText(QString::number(r.getPrixApplique(), 'f', 2));
     } else {
-        for (const Service &v : rdvs)
+        for (const RendezVous &v : rdvs)
             ui->comboRdv->addItem(QString("%1 — %2 (RDV n°%3)").arg(formatDate(v.getDateRdv()), v.getTypeRdv()).arg(v.getIdRdv()), v.getIdRdv());
         ui->labelTitreSaisieRendu->setText("Ajouter un service rendu");
         if (const Service *s = trouverService(ui->comboServiceRendu->currentData().toInt()))
@@ -1754,10 +1756,10 @@ void HistoriqueServices::ouvrirSaisie(const Service &r, const QVector<Service> &
 // 5. ACCÈS AUX DONNÉES AFFICHÉES (dernier résultat lu en base)
 // ---------------------------------------------------------------------------
 
-const Service *HistoriqueServices::trouverAnimal(int id) const
+const Animal *HistoriqueServices::trouverAnimal(int id) const
 {
-    for (const Service &a : m_animaux)
-        if (a.getIdAnimal() == id)
+    for (const Animal &a : m_animaux)
+        if (a.id == id)
             return &a;
     return nullptr;
 }
@@ -1765,7 +1767,7 @@ const Service *HistoriqueServices::trouverAnimal(int id) const
 const Service *HistoriqueServices::trouverRendu(int idRdv, int idService) const
 {
     for (const Service &r : m_rendus)
-        if (r.getIdRdv() == idRdv && r.getID() == idService)
+        if (r.getRdv().getIdRdv() == idRdv && r.getID() == idService)
             return &r;
     return nullptr;
 }
@@ -2003,20 +2005,22 @@ void GSmartPetCare::configurerPageAnimaux()
     // --- Tableau ---
     QTableWidget *t = ui->tableWidgetAnimaux;
     QHeaderView *h = t->horizontalHeader();
-    h->setMinimumSectionSize(50);
-    h->setFixedHeight(44);
+    // Colonnes larges et aérées : largeurs de base confortables (voir ajusterColonnesAnimaux),
+    // barre de défilement horizontale si la fenêtre est trop étroite plutôt que des colonnes écrasées.
+    h->setMinimumSectionSize(70);
+    h->setFixedHeight(48);
     h->setDefaultAlignment(Qt::AlignCenter);
-    h->setSectionResizeMode(AnimalColId,           QHeaderView::Fixed);   h->resizeSection(AnimalColId, 70);
-    h->setSectionResizeMode(AnimalColNom,          QHeaderView::Stretch);
-    h->setSectionResizeMode(AnimalColEspece,       QHeaderView::Fixed);   h->resizeSection(AnimalColEspece, 90);
-    h->setSectionResizeMode(AnimalColSexe,         QHeaderView::Fixed);   h->resizeSection(AnimalColSexe, 80);
-    h->setSectionResizeMode(AnimalColNaissance,    QHeaderView::Fixed);   h->resizeSection(AnimalColNaissance, 130);
-    h->setSectionResizeMode(AnimalColProprietaire, QHeaderView::Stretch);
-    h->setSectionResizeMode(AnimalColTelephone,    QHeaderView::Fixed);   h->resizeSection(AnimalColTelephone, 130);
-    h->setSectionResizeMode(AnimalColSuivi,        QHeaderView::Fixed);   h->resizeSection(AnimalColSuivi, 170);
-    h->setSectionResizeMode(AnimalColActions,      QHeaderView::Fixed);   h->resizeSection(AnimalColActions, 178);
+    h->setSectionResizeMode(QHeaderView::Interactive);
     h->setStretchLastSection(false);
-    t->verticalHeader()->setDefaultSectionSize(42);
+    t->setHorizontalScrollMode(QAbstractItemView::ScrollPerPixel);
+    t->setHorizontalScrollBarPolicy(Qt::ScrollBarAsNeeded);
+    t->setWordWrap(false);
+    t->setTextElideMode(Qt::ElideRight);
+    t->verticalHeader()->setDefaultSectionSize(56);
+    t->setStyleSheet(QStringLiteral(
+        "QHeaderView::section { padding: 8px 16px; }"
+        "QTableWidget::item { padding: 6px 14px; }"));
+    ajusterColonnesAnimaux();
 
     // --- Formulaire ---
     ui->dateEditNaissanceAnimal->setDisplayFormat("dd/MM/yyyy");
@@ -2046,6 +2050,42 @@ void GSmartPetCare::configurerPageAnimaux()
     nouveauFormulaireAnimal();           // le panneau de droite démarre en mode « Ajouter »
     rafraichirTableAnimaux();
     majBadgeAnimaux();
+}
+
+// Largeurs de base (px) de chaque colonne ; l'espace libre éventuel est réparti sur Nom, Propriétaire et Suivi.
+void GSmartPetCare::ajusterColonnesAnimaux()
+{
+    QTableWidget *t = ui->tableWidgetAnimaux;
+    QHeaderView *h = t->horizontalHeader();
+    int largeur[AnimalNbColonnes];
+    largeur[AnimalColId]           = 90;
+    largeur[AnimalColNom]          = 170;
+    largeur[AnimalColEspece]       = 130;
+    largeur[AnimalColSexe]         = 110;
+    largeur[AnimalColNaissance]    = 160;
+    largeur[AnimalColProprietaire] = 190;
+    largeur[AnimalColTelephone]    = 160;
+    largeur[AnimalColSuivi]        = 200;
+    largeur[AnimalColActions]      = 230;
+
+    int total = 0;
+    for (int c = 0; c < AnimalNbColonnes; ++c)
+        total += largeur[c];
+    const int libre = t->viewport()->width() - total;
+    if (libre > 0) {
+        largeur[AnimalColNom]          += libre / 3;
+        largeur[AnimalColProprietaire] += libre / 3;
+        largeur[AnimalColSuivi]        += libre - 2 * (libre / 3);
+    }
+    for (int c = 0; c < AnimalNbColonnes; ++c)
+        h->resizeSection(c, largeur[c]);
+}
+
+void GSmartPetCare::resizeEvent(QResizeEvent *event)
+{
+    QMainWindow::resizeEvent(event);
+    if (ui && ui->tableWidgetAnimaux)
+        ajusterColonnesAnimaux();
 }
 
 QString GSmartPetCare::formaterIdAnimal(int id)
@@ -2111,12 +2151,12 @@ void GSmartPetCare::rafraichirTableAnimaux()
             // Boutons « Modifier » / « Supprimer » de la ligne
             auto *actions = new QWidget(t);
             auto *buttons = new QHBoxLayout(actions);
-            buttons->setContentsMargins(2, 2, 2, 2);
-            buttons->setSpacing(4);
+            buttons->setContentsMargins(8, 6, 8, 6);
+            buttons->setSpacing(10);
             auto *modifier  = new QPushButton("Modifier", actions);
             auto *supprimer = new QPushButton("Supprimer", actions);
-            modifier->setStyleSheet("QPushButton{background:#2471A3;color:white;border:0;border-radius:5px;padding:5px;} QPushButton:hover{background:#1A5276;}");
-            supprimer->setStyleSheet("QPushButton{background:#C0392B;color:white;border:0;border-radius:5px;padding:5px;} QPushButton:hover{background:#A5311F;}");
+            modifier->setStyleSheet("QPushButton{background:#2471A3;color:white;border:0;border-radius:5px;padding:6px 12px;} QPushButton:hover{background:#1A5276;}");
+            supprimer->setStyleSheet("QPushButton{background:#C0392B;color:white;border:0;border-radius:5px;padding:6px 12px;} QPushButton:hover{background:#A5311F;}");
             buttons->addWidget(modifier);
             buttons->addWidget(supprimer);
             const int idAction = a.id;

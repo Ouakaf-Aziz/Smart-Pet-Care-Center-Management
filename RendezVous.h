@@ -8,6 +8,7 @@
 #include <QVariant>
 #include <QDate>
 #include <QTime>
+#include <QVector>
 
 // Accès à la table Oracle RENDEZ_VOUS
 // (ID_RDV NUMBER, ID_EMPLOYE -> EMPLOYE.ID_EMPLOYR, ID_ANIMAL -> ANIMAL, DATE_RDV DATE,
@@ -17,6 +18,18 @@ class RendezVous
 {
 public:
     RendezVous();
+
+    // ----- Attributs d'un rendez-vous (lecture depuis RENDEZ_VOUS) -----
+    int     getIdRdv() const { return idRdv; }
+    QDate   getDateRdv() const { return dateRdv; }
+    QString getTypeRdv() const { return typeRdv; }
+    void    setIdRdv(int i) { idRdv = i; }
+    void    setDateRdv(const QDate &d) { dateRdv = d; }
+    void    setTypeRdv(const QString &t) { typeRdv = t; }
+
+    // Rendez-vous d'un animal (le plus récent d'abord) : chaque objet porte idRdv, dateRdv, typeRdv.
+    // Utilisé par l'historique des services rendus (module Service).
+    static QVector<RendezVous> rendezVousAnimal(int idAnimal);
 
     // idAnimal : QVariant nul = pas d'animal (colonne ID_ANIMAL à NULL)
     bool ajouter(int id,
@@ -56,6 +69,10 @@ public:
     QString getDerniereErreur() const;
 
 private:
+    int     idRdv = 0;
+    QDate   dateRdv;
+    QString typeRdv;
+
     QVariant entierOuNull(const QVariant &valeur) const;
     QString derniereErreur;
 };

@@ -15,6 +15,8 @@
 #include <QVector>
 #include <QVariantMap>
 
+#include "RendezVous.h"
+
 // ---------------------------------------------------------------------------
 class QSettings;
 
@@ -100,48 +102,21 @@ public:
     // rendez-vous d'un animal) : prix appliqué + observation. La date est celle
     // du rendez-vous.
     //
-    // Il n'y a plus de classes séparées (AnimalInfo, RendezVousInfo, ServiceRendu) :
-    // leurs attributs sont directement dans Service (voir la section « private »).
-    //  - objet « animal »       : idAnimal, nomAnimal, espece, proprietaire
-    //  - objet « rendez-vous »  : idRdv, dateRdv, typeRdv
-    //  - objet « service rendu »: id/nom/type du service + idRdv, dateRdv, prixApplique, remarque
-    // PROVISOIRE (jusqu'à l'intégration des modules Animaux et Rendez-vous) :
-    // les champs animal / rendez-vous sont en lecture seule : le module Service ne
-    // les ajoute, ne les modifie et ne les supprime jamais.
+    // Les attributs et méthodes « animal » sont dans la classe Animal (animal.h) :
+    //    Animal::rechercherParTexte(), Animal::statistiquesServices().
+    // Les attributs et méthodes « rendez-vous » sont dans la classe RendezVous (RendezVous.h) :
+    //    RendezVous::rendezVousAnimal(). Un service rendu est rattaché à son rendez-vous (getRdv / setRdv).
     // -----------------------------------------------------------------------
 
-    // Getters / setters des attributs « animal »
-    int getIdAnimal() const { return idAnimal; }
-    QString getNomAnimal() const { return nomAnimal; }
-    QString getEspece() const { return espece; }
-    QString getProprietaire() const { return proprietaire; }
-    void setIdAnimal(int a) { idAnimal = a; }
-    void setNomAnimal(QString n) { nomAnimal = n; }
-    void setEspece(QString e) { espece = e; }
-    void setProprietaire(QString p) { proprietaire = p; }
+    // Rendez-vous du service rendu (idRdv, dateRdv, typeRdv : voir la classe RendezVous)
+    const RendezVous &getRdv() const { return rdv; }
+    void setRdv(const RendezVous &r) { rdv = r; }
 
-    // Getters / setters des attributs « rendez-vous » et « service rendu »
-    int getIdRdv() const { return idRdv; }
-    QDate getDateRdv() const { return dateRdv; }
-    QString getTypeRdv() const { return typeRdv; }
+    // Attributs propres au « service rendu » (table INCLURE)
     double getPrixApplique() const { return prixApplique; }
     QString getRemarque() const { return remarque; }
-    void setIdRdv(int r) { idRdv = r; }
-    void setDateRdv(QDate d) { dateRdv = d; }
-    void setTypeRdv(QString t) { typeRdv = t; }
     void setPrixApplique(double p) { prixApplique = p; }
     void setRemarque(QString r) { remarque = r; }
-
-    // Recherche d'animaux (nom, espèce ou propriétaire), triés par nom : faite par Oracle.
-    // Chaque Service renvoyé ne porte que les champs « animal ».
-    static QVector<Service> rechercherAnimaux(const QString &recherche);
-
-    // Nombre, total facturé et date du dernier service (COUNT, SUM, MAX en SQL)
-    static QVariantMap statistiquesAnimal(int idAnimal);
-
-    // Rendez-vous d'un animal (pour rattacher un nouveau service rendu).
-    // Chaque Service renvoyé ne porte que les champs « rendez-vous » (idRdv, dateRdv, typeRdv).
-    static QVector<Service> rendezVousAnimal(int idAnimal);
 
     // Services rendus à un animal (jointure INCLURE / RENDEZ_VOUS / SERVICE) : filtre + tri en SQL
     static QVector<Service> historiqueAnimal(int idAnimal,
@@ -173,14 +148,8 @@ private:
     int duree;
     bool disponible;
 
-    // --- « Animal » (table ANIMAL, lecture seule) ---
-    int idAnimal = 0;
-    QString nomAnimal, espece, proprietaire;
-
-    // --- « Rendez-vous » (table RENDEZ_VOUS, lecture seule) + « service rendu » (table INCLURE) ---
-    int idRdv = 0;
-    QDate dateRdv;
-    QString typeRdv;
+    // --- Rendez-vous du service rendu (classe RendezVous) + « service rendu » (table INCLURE) ---
+    RendezVous rdv;
     double prixApplique = 0.0;   // prix appliqué lors du rendez-vous (INCLURE.PRIX_APPLIQUE)
     QString remarque;            // observation (INCLURE.OBSERVATION)
 

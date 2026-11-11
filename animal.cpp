@@ -8,6 +8,7 @@
 #include <QSqlQuery>
 #include <QStandardPaths>
 #include <QVariant>
+#include <QVariantMap>
 
 namespace {
 
@@ -247,6 +248,77 @@ bool Animal::rechercher(QVector<Animal> &liste, const QString &texte,
         liste.append(depuisRequete(q));
     remplirErreur(erreur, QString());
     return true;
+}
+
+// ---------------------------------------------------------------------------
+// RECHERCHER PAR TEXTE : nom, espèce ou propriétaire (contient), triés par nom (Oracle)
+// Utilisée par l'historique des services rendus (module Service).
+// ---------------------------------------------------------------------------
+QVector<Animal> Animal::rechercherParTexte(const QString &recherche)
+{
+    QVector<Animal> liste;
+    QSqlQuery query;
+
+    QString sql = "SELECT ID_ANIMAL, NOM_ANIMAL, ESPECE, PROPRIETAIRE FROM ANIMAL ";
+    const bool avecRecherche = !recherche.trimmed().isEmpty();
+    if (avecRecherche) {
+        sql += "WHERE UPPER(NOM_ANIMAL) LIKE UPPER(:q1) ESCAPE '\\' "
+               "   OR UPPER(ESPECE) LIKE UPPER(:q2) ESCAPE '\\' "
+               "   OR UPPER(PROPRIETAIRE) LIKE UPPER(:q3) ESCAPE '\\' ";
+    }
+    sql += "ORDER BY UPPER(NOM_ANIMAL), ID_ANIMAL";
+
+    query.prepare(sql);
+    if (avecRecherche) {
+        QString m = recherche.trimmed();           // motif « contient » : échappe \ % _
+        m.replace("\\", "\\\\");
+        m.replace("%", "\\%");
+        m.replace("_", "\\_");
+        const QString motif = "%" + m + "%";
+        query.bindValue(":q1", motif);
+        query.bindValue(":q2", motif);
+        query.bindValue(":q3", motif);
+    }
+
+    if (!query.exec()) {
+        qDebug() << "RECHERCHE ANIMAL :" << query.lastError().text();
+        return liste;
+    }
+    while (query.next()) {
+        Animal a;
+        a.id = query.value(0).toInt();
+        a.nom = query.value(1).toString();
+        a.espece = query.value(2).toString();
+        a.proprietaire = query.value(3).toString();
+        liste.append(a);
+    }
+    return liste;
+}
+
+// ---------------------------------------------------------------------------
+// STATISTIQUES DES SERVICES D'UN ANIMAL : COUNT, SUM, MAX calculés par Oracle
+// ---------------------------------------------------------------------------
+QVariantMap Animal::statistiquesServices(int idAnimal)
+{
+    QVariantMap st;
+    QSqlQuery query;
+
+    query.prepare("SELECT COUNT(*), NVL(SUM(i.PRIX_APPLIQUE), 0), MAX(r.DATE_RDV) "
+                  "FROM INCLURE i JOIN RENDEZ_VOUS r ON r.ID_RDV = i.ID_RDV "
+                  "WHERE r.ID_ANIMAL = :animal");
+    query.bindValue(":animal", idAnimal);
+
+    if (!query.exec()) {
+        qDebug() << "STATS ANIMAL :" << query.lastError().text();
+        return st;
+    }
+    if (query.next()) {
+        st.insert("nombre", query.value(0).toInt());
+        st.insert("total", query.value(1).toDouble());
+        st.insert("dernier", query.value(2).toDate());
+        st.insert("ok", true);
+    }
+    return st;
 }
 
 // ---------------------------------------------------------------------------

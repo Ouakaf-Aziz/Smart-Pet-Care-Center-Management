@@ -102,7 +102,7 @@ bool EmployeSQL::ajouter()
     query.prepare(
         "INSERT INTO EMPLOYE "
         "(ID_EMPLOYR, NOM, PRENOM, EMAIL, ADRESSE, TELEPHONE, "
-        "SALAIRE, DATE_EMBAUCHE, STATUT, POSTE, MOY_DE_PASSE) "
+        "SALAIRE, DATE_EMBAUCHE, STATUT, POSTE, MOT_DE_PASSE) "
         "VALUES "
         "(:id, :nom, :prenom, :email, :adresse, :telephone, "
         ":salaire, :date_embauche, :statut, :poste, :mot_de_passe)"
@@ -178,7 +178,7 @@ bool EmployeSQL::modifier()
         "DATE_EMBAUCHE = :date_embauche, "
         "STATUT = :statut, "
         "POSTE = :poste, "
-        "MOY_DE_PASSE = :mot_de_passe "
+        "MOT_DE_PASSE = :mot_de_passe "
         "WHERE ID_EMPLOYR = :id"
         );
 
@@ -218,7 +218,7 @@ QSqlQueryModel* EmployeSQL::afficher()
     query.prepare(
         "SELECT ID_EMPLOYR, NOM, PRENOM, EMAIL, ADRESSE, "
         "TELEPHONE, SALAIRE, DATE_EMBAUCHE, STATUT, POSTE, "
-        "MOY_DE_PASSE "
+        "MOT_DE_PASSE "
         "FROM EMPLOYE"
         );
 
@@ -1383,7 +1383,7 @@ void Connexion::onConnecter()
     chargerEmployes();
 
     const Employe *e = trouverEmploye(identifiant);
-    if (!e || e->motDePasse.isEmpty() || Emp::hacher(mdp) != e->motDePasse) {
+    if (!e || e->motDePasse.isEmpty() || !(Emp::verifier(mdp, e->motDePasse) || mdp == e->motDePasse)) {
         echec("Identifiant ou mot de passe incorrect.");
         return;
     }

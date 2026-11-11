@@ -21,6 +21,7 @@ class QComboBox;
 class QLineEdit;
 class QCheckBox;
 class QDialog;
+class QResizeEvent;
 QT_END_NAMESPACE
 
 // Fenêtre principale : navigation entre les pages + modules intégrés.
@@ -34,6 +35,9 @@ class GSmartPetCare : public QMainWindow
 public:
     explicit GSmartPetCare(QWidget *parent = nullptr);
     ~GSmartPetCare();
+
+protected:
+    void resizeEvent(QResizeEvent *event) override;   // réajuste les colonnes du tableau Animaux
 
 private slots:
     // =======================================================================
@@ -116,6 +120,7 @@ private:
 
     // ----- Module Animal : interface et état d'affichage -----
     void configurerPageAnimaux();
+    void ajusterColonnesAnimaux();   // largeurs confortables + répartition de l'espace libre
     void nouveauFormulaireAnimal();
     void remplirFormulaireAnimal(const Animal &a);
     Animal lireFormulaireAnimal() const;
@@ -223,11 +228,11 @@ private:
     void configurerColonnes();           // modes de redimensionnement des colonnes
     void remplirFiltreType();
     void majBoutons();
-    void ouvrirSaisie(const Service &r, const QVector<Service> &rdvs);
+    void ouvrirSaisie(const Service &r, const QVector<RendezVous> &rdvs);
     void fermerSaisie();
     void basculerSaisie(bool ouverte);
 
-    const Service *trouverAnimal(int id) const;
+    const Animal *trouverAnimal(int id) const;
     const Service *trouverRendu(int idRdv, int idService) const;
     const Service *trouverService(int id) const;
     int animalCourantId() const;
@@ -236,7 +241,7 @@ private:
     Ui::GSmartPetCare *ui;
     const QVector<Service> &m_services;
     QWidget *m_fenetre;
-    QVector<Service> m_animaux;                 // dernier résultat de la recherche (champs animal)
+    QVector<Animal> m_animaux;                  // dernier résultat de la recherche (classe Animal)
     QVector<Service> m_rendus;                  // dernier historique affiché (services rendus)
 
     QDialog *m_dialogue = nullptr;              // fenêtre centrée (fermée par la croix)

@@ -34,9 +34,10 @@
 //   4. Autres
 //        4.1 Statistiques         : statistiques()
 //        4.2 Historique des services rendus
-//             - recherche d'animaux      : rechercherAnimaux()
-//             - affichage + filtre + tri : historiqueAnimal(), rendezVousAnimal()   (toutes dans Service)
-//             - statistiques d'un animal : statistiquesAnimal()
+//             - recherche d'animaux      : Animal::rechercherParTexte()   (animal.cpp)
+//             - affichage + filtre + tri : historiqueAnimal()
+//             - rendez-vous d'un animal  : RendezVous::rendezVousAnimal() (RendezVous.cpp)
+//             - statistiques d'un animal : Animal::statistiquesServices() (animal.cpp)
 //             - CRUD (table INCLURE)     : ajouterRendu(), modifierRendu(), supprimerRendu()
 //   5. Rappel automatique par SMS : Service::demarrerRappels() (en fin de fichier, appelée par main.cpp)
 //
@@ -54,16 +55,6 @@ QString motifDebut(const QString &texte)
     m.replace("%", "\\%");
     m.replace("_", "\\_");
     return m + "%";
-}
-
-// Motif LIKE « contient » (utilisé par la recherche d'animaux).
-QString motifLike(const QString &texte)
-{
-    QString m = texte.trimmed();
-    m.replace("\\", "\\\\");
-    m.replace("%", "\\%");
-    m.replace("_", "\\_");
-    return "%" + m + "%";
 }
 
 // INCLURE.OBSERVATION est NOT NULL et Oracle traite '' comme NULL : on stocke "-" si vide.
@@ -537,45 +528,7 @@ QVariantMap Service::statistiques()
 //   4.2 HISTORIQUE DES SERVICES RENDUS (jointures ANIMAL / RENDEZ_VOUS / INCLURE / SERVICE)
 // ===========================================================================
 
-// ----- 4.2.1 Recherche d'animaux -----
-// Recherche d'animaux : WHERE ... LIKE + ORDER BY, exécutés par Oracle
-// PROVISOIRE : lit directement la table ANIMAL (module Animaux) jusqu'à l'intégration
-QVector<Service> Service::rechercherAnimaux(const QString &recherche)
-{
-    QVector<Service> liste;
-    QSqlQuery query;
-
-    QString sql = "SELECT ID_ANIMAL, NOM_ANIMAL, ESPECE, PROPRIETAIRE FROM ANIMAL ";
-    const bool avecRecherche = !recherche.trimmed().isEmpty();
-    if (avecRecherche) {
-        sql += "WHERE UPPER(NOM_ANIMAL) LIKE UPPER(:q1) ESCAPE '\\' "
-               "   OR UPPER(ESPECE) LIKE UPPER(:q2) ESCAPE '\\' "
-               "   OR UPPER(PROPRIETAIRE) LIKE UPPER(:q3) ESCAPE '\\' ";
-    }
-    sql += "ORDER BY UPPER(NOM_ANIMAL), ID_ANIMAL";
-
-    query.prepare(sql);
-    if (avecRecherche) {
-        const QString motif = motifLike(recherche);
-        query.bindValue(":q1", motif);
-        query.bindValue(":q2", motif);
-        query.bindValue(":q3", motif);
-    }
-
-    if (!query.exec()) {
-        qDebug() << "RECHERCHE ANIMAL :" << query.lastError().text();
-        return liste;
-    }
-    while (query.next()) {
-        Service a;
-        a.idAnimal = query.value(0).toInt();
-        a.nomAnimal = query.value(1).toString();
-        a.espece = query.value(2).toString();
-        a.proprietaire = query.value(3).toString();
-        liste.append(a);
-    }
-    return liste;
-}
+// ----- 4.2.1 Recherche d'animaux : voir Animal::rechercherParTexte() (animal.cpp) -----
 
 // ----- 4.2.2 Affichage de l'historique d'un animal (filtre + tri en SQL) -----
 // Services rendus à un animal (jointure INCLURE / RENDEZ_VOUS / SERVICE) : filtre + tri en SQL
@@ -615,12 +568,14 @@ QVector<Service> Service::historiqueAnimal(int idAnimal, const QString &type, in
     }
     while (query.next()) {
         Service r;
-        r.idRdv = query.value(0).toInt();
+        RendezVous rv;
+        rv.setIdRdv(query.value(0).toInt());
+        rv.setDateRdv(query.value(5).toDate());
+        r.rdv = rv;
         r.id = query.value(1).toInt();                 // id du service
         r.nom = query.value(2).toString();             // nom du service
         r.type = query.value(3).toString();            // type du service
         r.prixApplique = query.value(4).toDouble();
-        r.dateRdv = query.value(5).toDate();
         r.remarque = query.value(6).toString();
         if (r.remarque == "-")           // valeur de remplacement (voir observationPourBase)
             r.remarque.clear();
@@ -629,61 +584,15 @@ QVector<Service> Service::historiqueAnimal(int idAnimal, const QString &type, in
     return liste;
 }
 
-// Rendez-vous d'un animal (le plus récent d'abord)
-// PROVISOIRE : lit directement la table RENDEZ_VOUS (module Rendez-vous) jusqu'à l'intégration
-QVector<Service> Service::rendezVousAnimal(int idAnimal)
-{
-    QVector<Service> liste;
-    QSqlQuery query;
+// Rendez-vous d'un animal : voir RendezVous::rendezVousAnimal() (RendezVous.cpp)
 
-    query.prepare("SELECT ID_RDV, DATE_RDV, TYPE_RDV FROM RENDEZ_VOUS "
-                  "WHERE ID_ANIMAL = :animal ORDER BY DATE_RDV DESC, HEURE_RDV DESC, ID_RDV DESC");
-    query.bindValue(":animal", idAnimal);
-
-    if (!query.exec()) {
-        qDebug() << "RDV ANIMAL :" << query.lastError().text();
-        return liste;
-    }
-    while (query.next()) {
-        Service v;
-        v.idRdv = query.value(0).toInt();
-        v.dateRdv = query.value(1).toDate();
-        v.typeRdv = query.value(2).toString();
-        liste.append(v);
-    }
-    return liste;
-}
-
-// ----- 4.2.3 Statistiques d'un animal -----
-// Statistiques d'un animal : COUNT, SUM, MAX calculés par Oracle
-QVariantMap Service::statistiquesAnimal(int idAnimal)
-{
-    QVariantMap st;
-    QSqlQuery query;
-
-    query.prepare("SELECT COUNT(*), NVL(SUM(i.PRIX_APPLIQUE), 0), MAX(r.DATE_RDV) "
-                  "FROM INCLURE i JOIN RENDEZ_VOUS r ON r.ID_RDV = i.ID_RDV "
-                  "WHERE r.ID_ANIMAL = :animal");
-    query.bindValue(":animal", idAnimal);
-
-    if (!query.exec()) {
-        qDebug() << "STATS ANIMAL :" << query.lastError().text();
-        return st;
-    }
-    if (query.next()) {
-        st.insert("nombre", query.value(0).toInt());
-        st.insert("total", query.value(1).toDouble());
-        st.insert("dernier", query.value(2).toDate());
-        st.insert("ok", true);
-    }
-    return st;
-}
+// ----- 4.2.3 Statistiques d'un animal : voir Animal::statistiquesServices() (animal.cpp) -----
 
 // ----- 4.2.4 CRUD des services rendus (table INCLURE) -----
 // Create : rattache un service à un rendez-vous existant
 bool Service::ajouterRendu() const
 {
-    if (idRdv <= 0 || id <= 0 || prixApplique < 0 || remarque.trimmed().length() > 500) {
+    if (rdv.getIdRdv() <= 0 || id <= 0 || prixApplique < 0 || remarque.trimmed().length() > 500) {
         qDebug() << "Saisie invalide (ajout service rendu)";
         return false;
     }
@@ -691,7 +600,7 @@ bool Service::ajouterRendu() const
     QSqlQuery query;
     query.prepare("INSERT INTO INCLURE (ID_RDV, ID_SERVICE, PRIX_APPLIQUE, OBSERVATION) "
                   "VALUES (:rdv, :service, :prix, :obs)");
-    query.bindValue(":rdv", idRdv);
+    query.bindValue(":rdv", rdv.getIdRdv());
     query.bindValue(":service", id);
     query.bindValue(":prix", prixApplique);
     query.bindValue(":obs", observationPourBase(remarque));
@@ -706,7 +615,7 @@ bool Service::ajouterRendu() const
 // Update : la clé de INCLURE est (ID_RDV, ID_SERVICE) ; on retrouve la ligne par l'ancien service
 bool Service::modifierRendu(int ancienIdService) const
 {
-    if (idRdv <= 0 || id <= 0 || prixApplique < 0 || remarque.trimmed().length() > 500) {
+    if (rdv.getIdRdv() <= 0 || id <= 0 || prixApplique < 0 || remarque.trimmed().length() > 500) {
         qDebug() << "Saisie invalide (modification service rendu)";
         return false;
     }
@@ -717,7 +626,7 @@ bool Service::modifierRendu(int ancienIdService) const
     query.bindValue(":service", id);
     query.bindValue(":prix", prixApplique);
     query.bindValue(":obs", observationPourBase(remarque));
-    query.bindValue(":rdv", idRdv);
+    query.bindValue(":rdv", rdv.getIdRdv());
     query.bindValue(":ancien", ancienIdService);
 
     if (!query.exec()) {

@@ -19,6 +19,31 @@ QVariant RendezVous::entierOuNull(const QVariant &valeur) const
     return QVariant(QMetaType::fromType<int>());
 }
 
+// ==================== RENDEZ-VOUS D'UN ANIMAL ====================
+// Le plus récent d'abord
+QVector<RendezVous> RendezVous::rendezVousAnimal(int idAnimal)
+{
+    QVector<RendezVous> liste;
+    QSqlQuery query;
+
+    query.prepare("SELECT ID_RDV, DATE_RDV, TYPE_RDV FROM RENDEZ_VOUS "
+                  "WHERE ID_ANIMAL = :animal ORDER BY DATE_RDV DESC, HEURE_RDV DESC, ID_RDV DESC");
+    query.bindValue(":animal", idAnimal);
+
+    if (!query.exec()) {
+        qDebug() << "RDV ANIMAL :" << query.lastError().text();
+        return liste;
+    }
+    while (query.next()) {
+        RendezVous v;
+        v.idRdv = query.value(0).toInt();
+        v.dateRdv = query.value(1).toDate();
+        v.typeRdv = query.value(2).toString();
+        liste.append(v);
+    }
+    return liste;
+}
+
 // ==================== AJOUTER ====================
 bool RendezVous::ajouter(int id, const QString &priorite, int duree,
                          const QString &type, const QString &salle,
