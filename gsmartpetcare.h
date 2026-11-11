@@ -12,6 +12,7 @@
 
 #include "RendezVous.h"
 #include "service.h"
+#include "animal.h"
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class GSmartPetCare; }
@@ -24,7 +25,7 @@ QT_END_NAMESPACE
 // Fenêtre principale : navigation entre les pages + modules intégrés.
 //   - MODULE RENDEZ-VOUS : CRUD intégré (requêtes SQL dans la classe RendezVous)
 //   - MODULE SERVICE     : CRUD intégré (requêtes SQL dans la classe Service ; vues en bas de ce fichier)
-//   - MODULE EMPLOYÉ / ANIMAL : interface seulement (à intégrer)
+//   - MODULE EMPLOYÉ : interface seulement
 class GSmartPetCare : public QMainWindow
 {
     Q_OBJECT
@@ -59,8 +60,18 @@ private slots:
     // =======================================================================
 
     // =======================================================================
-    // === MODULE ANIMAL   (interface seulement : à intégrer) ================
-    // =======================================================================
+    // === MODULE ANIMAL ======================================================
+    void onEnregistrerAnimal();
+    void onSupprimerAnimal(int id);
+    void onModifierAnimal(int id);
+    void onAnnulerAnimal();
+    void onChoisirPhotoAnimal();
+    void onSelectionAnimalChangee();
+    void rafraichirTableAnimaux();
+    void onExporterPdfAnimaux();
+    void onDossierMedicalAnimal();
+    void onStatistiquesAnimaux();
+    void onChatbotAnimal();
 
 private:
     Ui::GSmartPetCare *ui;
@@ -94,6 +105,22 @@ private:
     void supprimerLigne(int row);
     void nouveauFormulaire();      // formulaire vide, mode « Ajouter »
     bool genererPdf(const QString &chemin);
+
+    // ----- Module Animal : interface et état d'affichage -----
+    void configurerPageAnimaux();
+    void nouveauFormulaireAnimal();
+    void remplirFormulaireAnimal(const Animal &a);
+    Animal lireFormulaireAnimal() const;
+    bool validerFormulaireAnimal(QString *erreur) const;
+    void definirModeAnimal(bool modification);
+    int idAnimalSelectionne() const;
+    void majBadgeAnimaux();
+    bool genererPdfAnimaux(const QString &chemin, const QVector<Animal> &lignes) const;
+    static QString formaterIdAnimal(int id);
+    QString reponseChatbotAnimal(const QString &question, int idMode) const;
+
+    QVector<Animal> m_vueAnimaux;
+    int m_idEnModification = -1;
 
     RendezVous m_rdv;                 // accès à la base de données (toutes les requêtes SQL)
     int m_ligneEnModification = -1;   // -1 = mode « Ajouter »

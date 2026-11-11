@@ -1,6 +1,16 @@
 #include "gsmartpetcare.h"
 #include "ui_gsmartpetcare.h"
 
+#include "animal.h"
+#include <QColor>
+#include <QDoubleSpinBox>
+#include <QFontMetrics>
+#include <QFrame>
+#include <QScrollArea>
+#include <QTextEdit>
+#include <initializer_list>
+#include <utility>
+
 #include <QCheckBox>
 #include <QComboBox>
 #include <QDate>
@@ -143,6 +153,7 @@ GSmartPetCare::GSmartPetCare(QWidget *parent)
     // Modules intégrés (lisent et écrivent dans Oracle) :
     initialiserRdv();                    // MODULE RENDEZ-VOUS
     new GestionServices(ui, this, this); // MODULE SERVICE (+ historique et statistiques)
+    configurerPageAnimaux();               // MODULE ANIMAL
 
     // Navigation depuis le menu latéral (employés et animaux : interface seulement pour l'instant)
     afficherContenu(ContenuAccueil);
@@ -153,7 +164,10 @@ GSmartPetCare::GSmartPetCare(QWidget *parent)
         rafraichirRdv();                    // recharge les rendez-vous et les animaux depuis la base
         afficherContenu(ContenuRDV);
     });
-    connect(ui->btnNavAnimaux,  &QPushButton::clicked, this, [this]() { afficherContenu(ContenuAnimaux); });
+    connect(ui->btnNavAnimaux,  &QPushButton::clicked, this, [this]() {
+        rafraichirTableAnimaux();
+        afficherContenu(ContenuAnimaux);
+    });
 
     // Déconnexion : retour à la page de connexion
     connect(ui->btnDeconnexion, &QPushButton::clicked, this, [this]() {
@@ -1845,4 +1859,1264 @@ void GraphiqueService::paintEvent(QPaintEvent *)
             int n=m_values.size();double slot=double(plot.height())/n;int bh=qMax(8,int(slot*.55));
             for(int i=0;i<n;++i){int bw=int((qMax(0.0,m_values[i])/maxv)*(plot.width()-8));int y=int(plot.top()+i*slot+(slot-bh)/2);QRect b(plot.left(),y,bw,bh);p.fillRect(b,colors[i%colors.size()]);p.setPen(QColor("#334155"));p.drawText(5,y-1,left-12,bh+3,Qt::AlignVCenter|Qt::AlignRight,m_labels.value(i));p.drawText(qMin(plot.right()-35,b.right()+5),y-1,38,bh+3,Qt::AlignVCenter,QString::number(m_values[i],'f',1));}
         }
+}
+
+
+namespace {
+
+enum AnimalColonne { AnimalColId = 0, AnimalColNom, AnimalColEspece, AnimalColSexe, AnimalColNaissance, AnimalColProprietaire,
+               AnimalColTelephone, AnimalColSuivi, AnimalColActions, AnimalNbColonnes };
+
+const QString kAJourAnimal = QString::fromUtf8("À jour");
+
+void selectionnerComboAnimal(QComboBox *combo, const QString &texte)
+{
+    const int i = combo->findText(texte, Qt::MatchFixedString);   // insensible à la casse
+    combo->setCurrentIndex(i >= 0 ? i : 0);
+}
+
+QTableWidgetItem *celluleAnimal(const QString &texte, bool centre = true)
+{
+    auto *item = new QTableWidgetItem(texte);
+    item->setToolTip(texte);
+    item->setTextAlignment(centre ? Qt::Alignment(Qt::AlignCenter)
+                                  : Qt::Alignment(Qt::AlignVCenter | Qt::AlignLeft));
+    return item;
+}
+
+
+// Texte sans accents et en minuscules (comparaison des questions du chatbot)
+QString normaliser(const QString &texte)
+{
+    QString n = texte.toLower().normalized(QString::NormalizationForm_D);
+    n.remove(QRegularExpression(QStringLiteral("[\\x{0300}-\\x{036f}]")));
+    return n;
+}
+
+// ---------------------------------------------------------------------------
+// Graphiques de la page « Statistiques » (dessinés avec QPainter, sans fichier supplémentaire)
+// ---------------------------------------------------------------------------
+
+// Cercle (anneau) avec le total au centre et une légende à droite.
+class DonutChart : public QWidget
+{
+public:
+    explicit DonutChart(QWidget *parent = nullptr) : QWidget(parent)
+    {
+        m_colors = { QColor("#0F766E"), QColor("#F28C28"), QColor("#3B82F6"),
+                     QColor("#C0392B"), QColor("#8B5CF6"), QColor("#EAB308"),
+                     QColor("#14B8A6") };
+    }
+    void setData(const QMap<QString, int> &data) { m_data = data; update(); }
+    void setUnite(const QString &unite) { m_unite = unite; update(); }
+    QSize minimumSizeHint() const override { return QSize(260, 120); }
+
+protected:
+    void paintEvent(QPaintEvent *) override
+    {
+        QPainter p(this);
+        p.setRenderHint(QPainter::Antialiasing);
+
+        int total = 0;
+        for (auto it = m_data.constBegin(); it != m_data.constEnd(); ++it)
+            total += it.value();
+
+        // --- Cercle ---
+        const int side = qMin(height(), width());
+        const qreal thickness = side * 0.16;
+        const QRectF ring(thickness / 2 + 2, thickness / 2 + 2,
+                          side - thickness - 4, side - thickness - 4);
+
+        if (total == 0) {
+            p.setPen(QPen(QColor("#E3EAE9"), thickness, Qt::SolidLine, Qt::FlatCap));
+            p.drawEllipse(ring);
+        } else {
+            int start = 90 * 16;               // départ en haut, sens horaire
+            int i = 0;
+            for (auto it = m_data.constBegin(); it != m_data.constEnd(); ++it, ++i) {
+                if (it.value() <= 0)
+                    continue;
+                const int span = -qRound(360.0 * 16 * it.value() / total);
+                p.setPen(QPen(m_colors[i % m_colors.size()], thickness, Qt::SolidLine, Qt::FlatCap));
+                p.drawArc(ring, start, span);
+                start += span;
+            }
+        }
+
+        // --- Total au centre ---
+        QFont f = font();
+        f.setPointSize(18);
+        f.setBold(true);
+        p.setFont(f);
+        p.setPen(QColor("#0B4F4A"));
+        p.drawText(QRectF(0, side * 0.28, side, side * 0.25), Qt::AlignCenter, QString::number(total));
+
+        f.setPointSize(8);
+        f.setBold(false);
+        p.setFont(f);
+        p.setPen(QColor("#6B7A78"));
+        p.drawText(QRectF(0, side * 0.52, side, side * 0.15), Qt::AlignCenter, m_unite);
+
+        // --- Légende ---
+        f.setPointSize(9);
+        p.setFont(f);
+
+        const int legendX = side + 24;
+        const int rowH = 20;
+        const int rows = qMax(1, int(m_data.size()));
+        int y = (height() - rows * rowH) / 2;
+
+        if (total == 0) {
+            p.setPen(QColor("#6B7A78"));
+            p.drawText(QRectF(legendX, y, width() - legendX, rowH),
+                       Qt::AlignVCenter | Qt::AlignLeft, QString::fromUtf8("Aucune donnée"));
+            return;
+        }
+
+        int i = 0;
+        for (auto it = m_data.constBegin(); it != m_data.constEnd(); ++it, ++i, y += rowH) {
+            p.setPen(Qt::NoPen);
+            p.setBrush(m_colors[i % m_colors.size()]);
+            p.drawRoundedRect(QRectF(legendX, y + (rowH - 10) / 2.0, 10, 10), 2, 2);
+
+            const int pct = qRound(100.0 * it.value() / total);
+            p.setPen(QColor("#1F2A37"));
+            p.drawText(QRectF(legendX + 18, y, width() - legendX - 18, rowH),
+                       Qt::AlignVCenter | Qt::AlignLeft,
+                       QString("%1 : %2 (%3%)").arg(it.key()).arg(it.value()).arg(pct));
+        }
+    }
+
+private:
+    QMap<QString, int> m_data;
+    QVector<QColor> m_colors;
+    QString m_unite = QStringLiteral("animaux");
+};
+
+// Histogramme vertical.
+class BarChart : public QWidget
+{
+public:
+    explicit BarChart(QWidget *parent = nullptr) : QWidget(parent), m_couleur("#0F766E") {}
+    void setData(const QVector<QPair<QString, double>> &data, const QColor &couleur)
+    {
+        m_data = data;
+        m_couleur = couleur;
+        update();
+    }
+    QSize minimumSizeHint() const override { return QSize(260, 160); }
+
+protected:
+    void paintEvent(QPaintEvent *) override
+    {
+        QPainter p(this);
+        p.setRenderHint(QPainter::Antialiasing);
+
+        QFont f = font();
+        f.setPointSize(9);
+        p.setFont(f);
+        const QFontMetrics fm(f);
+
+        double maxVal = 0;
+        for (const auto &d : m_data)
+            maxVal = std::max(maxVal, d.second);
+
+        if (m_data.isEmpty() || maxVal <= 0) {
+            p.setPen(QColor("#6B7A78"));
+            p.drawText(rect(), Qt::AlignCenter, QString::fromUtf8("Aucune donnée"));
+            return;
+        }
+
+        const int n = m_data.size();
+        const int margeHaut = fm.height() + 10;
+        const int margeBas = fm.height() + 10;
+        const QRectF zone(8, margeHaut, width() - 16, height() - margeHaut - margeBas);
+        const qreal pas = zone.width() / n;
+        const qreal largeur = qMin<qreal>(pas * 0.6, 70);
+
+        p.setPen(QPen(QColor("#CBD5D3"), 1));                       // ligne de base
+        p.drawLine(QPointF(zone.left(), zone.bottom()), QPointF(zone.right(), zone.bottom()));
+
+        for (int i = 0; i < n; ++i) {
+            const qreal hauteur = zone.height() * m_data[i].second / maxVal;
+            const qreal x = zone.left() + pas * i + (pas - largeur) / 2;
+            const QRectF barre(x, zone.bottom() - hauteur, largeur, hauteur);
+
+            p.setPen(Qt::NoPen);
+            p.setBrush(m_couleur);
+            if (hauteur > 0)
+                p.drawRoundedRect(barre, 4, 4);
+
+            p.setPen(QColor("#1F2A37"));
+            p.drawText(QRectF(zone.left() + pas * i, barre.top() - fm.height() - 4, pas, fm.height()),
+                       Qt::AlignCenter, QString::number(qRound(m_data[i].second)));
+
+            p.setPen(QColor("#6B7A78"));
+            p.drawText(QRectF(zone.left() + pas * i, zone.bottom() + 4, pas, fm.height() + 2),
+                       Qt::AlignCenter, fm.elidedText(m_data[i].first, Qt::ElideRight, int(pas) - 4));
+        }
+    }
+
+private:
+    QVector<QPair<QString, double>> m_data;
+    QColor m_couleur;
+};
+
+// Courbe d'évolution.
+class LineChart : public QWidget
+{
+public:
+    explicit LineChart(QWidget *parent = nullptr) : QWidget(parent), m_couleur("#0F766E") {}
+    void setData(const QVector<QPair<QString, double>> &data)
+    {
+        m_data = data;
+        update();
+    }
+    QSize minimumSizeHint() const override { return QSize(260, 160); }
+
+protected:
+    void paintEvent(QPaintEvent *) override
+    {
+        QPainter p(this);
+        p.setRenderHint(QPainter::Antialiasing);
+
+        QFont f = font();
+        f.setFamily("Arial");
+        f.setPointSize(11);
+        p.setFont(f);
+        const QFontMetrics fm(f);
+
+        double maxVal = 0;
+        for (const auto &d : m_data)
+            maxVal = std::max(maxVal, d.second);
+
+        if (m_data.isEmpty() || maxVal <= 0) {
+            p.setPen(QColor("#1F2A37"));
+            p.drawText(rect(), Qt::AlignCenter, QString::fromUtf8("Aucune donnée"));
+            return;
+        }
+
+        const int n = m_data.size();
+        const int margeHaut = fm.height() + 12;
+        const int margeBas = fm.height() + 10;
+        const QRectF zone(24, margeHaut, width() - 48, height() - margeHaut - margeBas);
+        const qreal pas = zone.width() / n;
+
+        p.setPen(QPen(QColor("#CBD5D3"), 1, Qt::DashLine));         // repères horizontaux
+        for (int k = 0; k <= 2; ++k) {
+            const qreal y = zone.bottom() - zone.height() * k / 2.0;
+            p.drawLine(QPointF(zone.left(), y), QPointF(zone.right(), y));
+        }
+
+        QVector<QPointF> pts;                                       // un point par mois
+        for (int i = 0; i < n; ++i)
+            pts.append(QPointF(zone.left() + pas * (i + 0.5),
+                               zone.bottom() - zone.height() * m_data[i].second / maxVal));
+
+        if (n > 1) {                                                // aire sous la courbe
+            QPainterPath aire;
+            aire.moveTo(pts.first().x(), zone.bottom());
+            for (const QPointF &pt : std::as_const(pts))
+                aire.lineTo(pt);
+            aire.lineTo(pts.last().x(), zone.bottom());
+            aire.closeSubpath();
+            QColor c = m_couleur;
+            c.setAlpha(40);
+            p.setPen(Qt::NoPen);
+            p.setBrush(c);
+            p.drawPath(aire);
+        }
+
+        p.setPen(QPen(m_couleur, 3, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));   // courbe
+        p.setBrush(Qt::NoBrush);
+        for (int i = 1; i < n; ++i)
+            p.drawLine(pts[i - 1], pts[i]);
+
+        for (int i = 0; i < n; ++i) {                               // points, valeurs, mois
+            p.setPen(QPen(m_couleur, 2));
+            p.setBrush(QColor("#FFFFFF"));
+            p.drawEllipse(pts[i], 5, 5);
+
+            p.setPen(QColor("#1F2A37"));
+            p.drawText(QRectF(pts[i].x() - pas / 2, pts[i].y() - fm.height() - 8, pas, fm.height()),
+                       Qt::AlignCenter, QString::number(qRound(m_data[i].second)));
+            p.drawText(QRectF(zone.left() + pas * i, zone.bottom() + 6, pas, fm.height() + 2),
+                       Qt::AlignCenter, m_data[i].first);
+        }
+    }
+
+private:
+    QVector<QPair<QString, double>> m_data;
+    QColor m_couleur;
+};
+
+const char *kStyleStats = R"(
+QDialog { background-color: #F4F8F7; }
+QWidget { font-family: "Arial"; font-size: 11pt; color: #1F2A37; }
+#carteStat { background-color: #FFFFFF; border: 1px solid #CBD5D3; border-radius: 12px; }
+#titrePage { font-size: 20pt; font-weight: bold; color: #0B4F4A; }
+#titreCarte { font-size: 13pt; font-weight: bold; color: #0B4F4A; }
+#sousTitreCarte { font-size: 9pt; color: #6B7A78; }
+#kpiTitre { font-size: 9pt; color: #6B7A78; }
+#kpiValeur { font-size: 20pt; font-weight: bold; color: #0F766E; }
+)";
+
+// Carte blanche avec un titre, un sous-titre et le graphique donné.
+QFrame *creerCarte(const QString &titre, const QString &sousTitre, QWidget *graphique, QWidget *parent)
+{
+    auto *carte = new QFrame(parent);
+    carte->setObjectName("carteStat");
+    auto *lay = new QVBoxLayout(carte);
+    lay->setContentsMargins(18, 14, 18, 14);
+    lay->setSpacing(4);
+
+    auto *lblTitre = new QLabel(titre, carte);
+    lblTitre->setObjectName("titreCarte");
+    auto *lblSous = new QLabel(sousTitre, carte);
+    lblSous->setObjectName("sousTitreCarte");
+
+    lay->addWidget(lblTitre);
+    lay->addWidget(lblSous);
+    lay->addWidget(graphique, 1);
+    return carte;
+}
+
+// Petite carte d'indicateur : un libellé et une grande valeur.
+QFrame *creerKpi(const QString &titre, const QString &valeur, QWidget *parent)
+{
+    auto *carte = new QFrame(parent);
+    carte->setObjectName("carteStat");
+    auto *lay = new QVBoxLayout(carte);
+    lay->setContentsMargins(18, 10, 18, 10);
+    lay->setSpacing(0);
+
+    auto *lblTitre = new QLabel(titre, carte);
+    lblTitre->setObjectName("kpiTitre");
+    auto *lblValeur = new QLabel(valeur, carte);
+    lblValeur->setObjectName("kpiValeur");
+
+    lay->addWidget(lblTitre);
+    lay->addWidget(lblValeur);
+    return carte;
+}
+
+} // namespace
+
+// ===========================================================================
+// MODULE ANIMAL — intégré au projet principal
+// ===========================================================================
+
+// ===========================================================================
+// MODULE ANIMAUX — vue (les requêtes Oracle sont dans la classe Animal)
+// ===========================================================================
+void GSmartPetCare::configurerPageAnimaux()
+{
+    ui->pageAnimaux->setAttribute(Qt::WA_StyledBackground, true);   // fond de la feuille de style
+
+    // --- Tableau ---
+    QTableWidget *t = ui->tableWidgetAnimaux;
+    QHeaderView *h = t->horizontalHeader();
+    h->setMinimumSectionSize(50);
+    h->setFixedHeight(44);
+    h->setDefaultAlignment(Qt::AlignCenter);
+    h->setSectionResizeMode(AnimalColId,           QHeaderView::Fixed);   h->resizeSection(AnimalColId, 70);
+    h->setSectionResizeMode(AnimalColNom,          QHeaderView::Stretch);
+    h->setSectionResizeMode(AnimalColEspece,       QHeaderView::Fixed);   h->resizeSection(AnimalColEspece, 90);
+    h->setSectionResizeMode(AnimalColSexe,         QHeaderView::Fixed);   h->resizeSection(AnimalColSexe, 80);
+    h->setSectionResizeMode(AnimalColNaissance,    QHeaderView::Fixed);   h->resizeSection(AnimalColNaissance, 130);
+    h->setSectionResizeMode(AnimalColProprietaire, QHeaderView::Stretch);
+    h->setSectionResizeMode(AnimalColTelephone,    QHeaderView::Fixed);   h->resizeSection(AnimalColTelephone, 130);
+    h->setSectionResizeMode(AnimalColSuivi,        QHeaderView::Fixed);   h->resizeSection(AnimalColSuivi, 170);
+    h->setSectionResizeMode(AnimalColActions,      QHeaderView::Fixed);   h->resizeSection(AnimalColActions, 178);
+    h->setStretchLastSection(false);
+    t->verticalHeader()->setDefaultSectionSize(42);
+
+    // --- Formulaire ---
+    ui->dateEditNaissanceAnimal->setDisplayFormat("dd/MM/yyyy");
+    ui->dateEditNaissanceAnimal->setMaximumDate(QDate::currentDate());
+    ui->comboBoxSuiviAnimal->clear();
+    ui->comboBoxSuiviAnimal->addItems({ kAJourAnimal,
+                                        QString::fromUtf8("Vaccin à renouveler"),
+                                        QString::fromUtf8("Vermifugation à faire"),
+                                        QString::fromUtf8("Contrôle à planifier") });
+
+    // --- Connexions ---
+    connect(ui->pushButtonEnregistrerAnimal,  &QPushButton::clicked, this, &GSmartPetCare::onEnregistrerAnimal);
+    connect(ui->pushButtonAnnulerAnimal,      &QPushButton::clicked, this, &GSmartPetCare::onAnnulerAnimal);
+    connect(ui->pushButtonChoisirPhotoAnimal, &QPushButton::clicked, this, &GSmartPetCare::onChoisirPhotoAnimal);
+    connect(ui->pushButtonExporterPdfAnimal,  &QPushButton::clicked, this, &GSmartPetCare::onExporterPdfAnimaux);
+    connect(ui->pushButtonRappelsSanteAnimal, &QPushButton::clicked, this, &GSmartPetCare::onDossierMedicalAnimal);
+    connect(ui->pushButtonStatistiquesAnimal, &QPushButton::clicked, this, &GSmartPetCare::onStatistiquesAnimaux);
+    connect(ui->pushButtonChatbotAnimal,      &QPushButton::clicked, this, &GSmartPetCare::onChatbotAnimal);
+
+    connect(t, &QTableWidget::itemSelectionChanged, this, &GSmartPetCare::onSelectionAnimalChangee);
+    connect(ui->lineEditRechercheAnimal, &QLineEdit::textChanged, this, &GSmartPetCare::rafraichirTableAnimaux);
+    connect(ui->comboBoxTriAnimal,    QOverload<int>::of(&QComboBox::currentIndexChanged),
+            this, &GSmartPetCare::rafraichirTableAnimaux);
+    connect(ui->comboBoxFiltreEspece, QOverload<int>::of(&QComboBox::currentIndexChanged),
+            this, &GSmartPetCare::rafraichirTableAnimaux);
+
+    nouveauFormulaireAnimal();           // le panneau de droite démarre en mode « Ajouter »
+    rafraichirTableAnimaux();
+    majBadgeAnimaux();
+}
+
+QString GSmartPetCare::formaterIdAnimal(int id)
+{
+    return QString("A%1").arg(id, 3, 10, QChar('0'));     // A001, A002, ...
+}
+
+int GSmartPetCare::idAnimalSelectionne() const
+{
+    const QList<QTableWidgetItem *> sel = ui->tableWidgetAnimaux->selectedItems();
+    if (sel.isEmpty())
+        return -1;
+    const QTableWidgetItem *item = ui->tableWidgetAnimaux->item(sel.first()->row(), AnimalColId);
+    return item ? item->data(Qt::UserRole).toInt() : -1;
+}
+
+void GSmartPetCare::majBadgeAnimaux()
+{
+    QVector<Animal> tous;
+    if (Animal::afficher(tous))
+        ui->badgeAnimaux->setText(QString::number(tous.size()));
+}
+
+// ---------------------------------------------------------------------------
+// Tableau : recherche + filtre par espèce + tri (exécutés par Oracle via Animal::rechercher)
+// ---------------------------------------------------------------------------
+void GSmartPetCare::rafraichirTableAnimaux()
+{
+    QString erreur;
+    const QString espece = ui->comboBoxFiltreEspece->currentIndex() > 0
+        ? ui->comboBoxFiltreEspece->currentText() : QString();
+    if (!Animal::rechercher(m_vueAnimaux, ui->lineEditRechercheAnimal->text(),
+                            espece, ui->comboBoxTriAnimal->currentIndex(), &erreur)) {
+        QMessageBox::warning(this, "Oracle - Recherche animaux", erreur);
+        m_vueAnimaux.clear();
+    }
+
+    QTableWidget *t = ui->tableWidgetAnimaux;
+    {
+        const QSignalBlocker blocker(t);       // pas de rechargement du formulaire pendant le remplissage
+        t->clearContents();
+        t->setRowCount(m_vueAnimaux.size());
+
+        int ligneAGarder = -1;
+        for (int r = 0; r < m_vueAnimaux.size(); ++r) {
+            const Animal &a = m_vueAnimaux[r];
+
+            QTableWidgetItem *id = celluleAnimal(formaterIdAnimal(a.id));
+            id->setData(Qt::UserRole, a.id);                 // l'id numérique voyage avec la ligne
+            t->setItem(r, AnimalColId, id);
+            t->setItem(r, AnimalColNom, celluleAnimal(a.nom, false));
+            t->setItem(r, AnimalColEspece, celluleAnimal(a.espece));
+            t->setItem(r, AnimalColSexe, celluleAnimal(a.sexe));
+            t->setItem(r, AnimalColNaissance, celluleAnimal(a.naissance.toString("dd/MM/yyyy")));
+            t->setItem(r, AnimalColProprietaire, celluleAnimal(a.proprietaire, false));
+            t->setItem(r, AnimalColTelephone, celluleAnimal(a.telephone));
+
+            QTableWidgetItem *suivi = celluleAnimal(a.suiviSante);
+            const bool aJour = a.suiviSante.compare(kAJourAnimal, Qt::CaseInsensitive) == 0;
+            suivi->setForeground(aJour ? QColor("#0F766E") : QColor("#B45309"));
+            t->setItem(r, AnimalColSuivi, suivi);
+
+            // Boutons « Modifier » / « Supprimer » de la ligne
+            auto *actions = new QWidget(t);
+            auto *buttons = new QHBoxLayout(actions);
+            buttons->setContentsMargins(2, 2, 2, 2);
+            buttons->setSpacing(4);
+            auto *modifier  = new QPushButton("Modifier", actions);
+            auto *supprimer = new QPushButton("Supprimer", actions);
+            modifier->setStyleSheet("QPushButton{background:#2471A3;color:white;border:0;border-radius:5px;padding:5px;} QPushButton:hover{background:#1A5276;}");
+            supprimer->setStyleSheet("QPushButton{background:#C0392B;color:white;border:0;border-radius:5px;padding:5px;} QPushButton:hover{background:#A5311F;}");
+            buttons->addWidget(modifier);
+            buttons->addWidget(supprimer);
+            const int idAction = a.id;
+            connect(modifier,  &QPushButton::clicked, this, [this, idAction]() { onModifierAnimal(idAction); });
+            connect(supprimer, &QPushButton::clicked, this, [this, idAction]() { onSupprimerAnimal(idAction); });
+            t->setCellWidget(r, AnimalColActions, actions);
+
+            if (a.id == m_idEnModification)
+                ligneAGarder = r;
+        }
+        if (ligneAGarder >= 0)
+            t->selectRow(ligneAGarder);                       // la fiche en cours reste sélectionnée
+    }
+}
+
+// ---------------------------------------------------------------------------
+// Formulaire
+// ---------------------------------------------------------------------------
+void GSmartPetCare::definirModeAnimal(bool modification)
+{
+    ui->labelDetailTitreAnimal->setText(modification ? QString::fromUtf8("Modifier l'animal")
+                                                     : QString::fromUtf8("Ajouter un animal"));
+    ui->pushButtonEnregistrerAnimal->setText(modification ? QString::fromUtf8("Mettre à jour")
+                                                          : QString::fromUtf8("Enregistrer"));
+}
+
+void GSmartPetCare::nouveauFormulaireAnimal()
+{
+    m_idEnModification = -1;
+
+    ui->lineEditIdAnimal->setText(formaterIdAnimal(Animal::prochainId()));
+    ui->lineEditNomAnimal->clear();
+    ui->comboBoxEspeceAnimal->setCurrentIndex(0);
+    ui->comboBoxSexeAnimal->setCurrentIndex(0);
+    ui->dateEditNaissanceAnimal->setDate(QDate::currentDate());
+    ui->lineEditPhotoAnimal->clear();
+    ui->lineEditProprietaireAnimal->clear();
+    ui->lineEditTelephoneProprietaireAnimal->clear();
+    ui->lineEditEmailProprietaireAnimal->clear();
+    ui->comboBoxSuiviAnimal->setCurrentIndex(0);
+
+    {
+        const QSignalBlocker blocker(ui->tableWidgetAnimaux);
+        ui->tableWidgetAnimaux->clearSelection();
+    }
+    definirModeAnimal(false);
+}
+
+void GSmartPetCare::remplirFormulaireAnimal(const Animal &a)
+{
+    ui->lineEditIdAnimal->setText(formaterIdAnimal(a.id));
+    ui->lineEditNomAnimal->setText(a.nom);
+    selectionnerComboAnimal(ui->comboBoxEspeceAnimal, a.espece);
+    selectionnerComboAnimal(ui->comboBoxSexeAnimal, a.sexe);
+    ui->dateEditNaissanceAnimal->setDate(a.naissance.isValid() ? a.naissance : QDate::currentDate());
+    ui->lineEditPhotoAnimal->setText(a.photo);
+    ui->lineEditProprietaireAnimal->setText(a.proprietaire);
+    ui->lineEditTelephoneProprietaireAnimal->setText(a.telephone);
+    ui->lineEditEmailProprietaireAnimal->setText(a.email);
+    selectionnerComboAnimal(ui->comboBoxSuiviAnimal, a.suiviSante);
+}
+
+Animal GSmartPetCare::lireFormulaireAnimal() const
+{
+    Animal a;
+    a.nom          = ui->lineEditNomAnimal->text().trimmed();
+    a.espece       = ui->comboBoxEspeceAnimal->currentText();
+    a.sexe         = ui->comboBoxSexeAnimal->currentText();
+    a.naissance    = ui->dateEditNaissanceAnimal->date();
+    a.photo        = ui->lineEditPhotoAnimal->text().trimmed();
+    a.proprietaire = ui->lineEditProprietaireAnimal->text().trimmed();
+    a.telephone    = ui->lineEditTelephoneProprietaireAnimal->text().trimmed();
+    a.email        = ui->lineEditEmailProprietaireAnimal->text().trimmed();
+    a.suiviSante   = ui->comboBoxSuiviAnimal->currentText();
+    return a;
+}
+
+bool GSmartPetCare::validerFormulaireAnimal(QString *erreur) const
+{
+    auto echec = [erreur](const QString &message) {
+        if (erreur)
+            *erreur = message;
+        return false;
+    };
+
+    if (ui->lineEditNomAnimal->text().trimmed().isEmpty())
+        return echec(QString::fromUtf8("Le nom de l'animal est obligatoire."));
+    if (ui->lineEditProprietaireAnimal->text().trimmed().isEmpty())
+        return echec(QString::fromUtf8("Le nom du propriétaire est obligatoire."));
+
+    const QString tel = ui->lineEditTelephoneProprietaireAnimal->text().trimmed();
+    if (!tel.isEmpty()) {
+        QString chiffres = tel;
+        chiffres.remove(QRegularExpression(QStringLiteral("[^0-9]")));
+        const bool caracteresOk = !tel.contains(QRegularExpression(QStringLiteral("[^0-9 +()\\-.]")));
+        if (!caracteresOk || chiffres.size() < 8)
+            return echec(QString::fromUtf8("Le téléphone du propriétaire n'est pas valide (au moins 8 chiffres)."));
+    }
+
+    const QString email = ui->lineEditEmailProprietaireAnimal->text().trimmed();
+    if (!email.isEmpty()
+        && !QRegularExpression(QStringLiteral("^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$")).match(email).hasMatch())
+        return echec(QString::fromUtf8("L'email du propriétaire n'est pas valide."));
+
+    return true;
+}
+
+// ---------------------------------------------------------------------------
+// Actions
+// ---------------------------------------------------------------------------
+void GSmartPetCare::onSelectionAnimalChangee()
+{
+    const int id = idAnimalSelectionne();
+    if (id < 0)
+        return;                                   // rien de sélectionné : on ne touche pas au formulaire
+    for (const Animal &a : std::as_const(m_vueAnimaux)) {
+        if (a.id == id) {
+            m_idEnModification = id;
+            remplirFormulaireAnimal(a);
+            definirModeAnimal(true);
+            return;
+        }
+    }
+}
+
+// Bouton « Modifier » d'une ligne : charge la fiche dans le formulaire ; l'enregistrement se fait
+// ensuite avec « Mettre à jour ».
+void GSmartPetCare::onModifierAnimal(int id)
+{
+    for (int i = 0; i < ui->tableWidgetAnimaux->rowCount(); ++i) {
+        const QTableWidgetItem *cell = ui->tableWidgetAnimaux->item(i, AnimalColId);
+        if (cell && cell->data(Qt::UserRole).toInt() == id) {
+            ui->tableWidgetAnimaux->selectRow(i);
+            ui->lineEditNomAnimal->setFocus();
+            return;
+        }
+    }
+}
+
+void GSmartPetCare::onEnregistrerAnimal()
+{
+    QString erreur;
+    if (!validerFormulaireAnimal(&erreur)) {
+        QMessageBox::warning(this, "Formulaire incomplet", erreur);
+        return;
+    }
+
+    Animal saisie = lireFormulaireAnimal();
+    QString erreurOracle;
+
+    if (m_idEnModification == -1) {
+        if (!saisie.ajouter(&erreurOracle)) {
+            QMessageBox::critical(this, "Ajout Oracle impossible", erreurOracle);
+            return;
+        }
+        QMessageBox::information(this, "Animal ajouté", "Animal enregistré dans Oracle.");
+    } else {
+        saisie.id = m_idEnModification;
+        if (!saisie.modifier(&erreurOracle)) {
+            QMessageBox::critical(this, "Modification Oracle impossible", erreurOracle);
+            return;
+        }
+        QMessageBox::information(this, "Animal modifié", "Modification enregistrée dans Oracle.");
+    }
+
+    nouveauFormulaireAnimal();
+    rafraichirTableAnimaux();
+    majBadgeAnimaux();
+}
+
+void GSmartPetCare::onSupprimerAnimal(int id)
+{
+    QString nom = QString::number(id);
+    for (const Animal &a : std::as_const(m_vueAnimaux))
+        if (a.id == id) { nom = a.nom; break; }
+
+    const auto reponse = QMessageBox::question(
+        this, "Confirmer la suppression",
+        QString::fromUtf8("Voulez-vous vraiment supprimer %1 ?").arg(nom),
+        QMessageBox::Yes | QMessageBox::No, QMessageBox::No);
+    if (reponse != QMessageBox::Yes)
+        return;
+
+    QString erreurOracle;
+    if (!Animal::supprimer(id, &erreurOracle)) {
+        QMessageBox::critical(this, "Suppression Oracle impossible", erreurOracle);
+        return;
+    }
+
+    nouveauFormulaireAnimal();
+    rafraichirTableAnimaux();
+    majBadgeAnimaux();
+}
+
+// « Annuler » (bouton rouge) : abandonne la saisie ou la modification.
+void GSmartPetCare::onAnnulerAnimal()
+{
+    nouveauFormulaireAnimal();
+}
+
+void GSmartPetCare::onChoisirPhotoAnimal()
+{
+    const QString chemin = QFileDialog::getOpenFileName(
+        this, "Choisir une photo", QString(), "Images (*.png *.jpg *.jpeg)");
+    if (!chemin.isEmpty())
+        ui->lineEditPhotoAnimal->setText(chemin);
+}
+
+// ---------------------------------------------------------------------------
+// Statistiques : 4 indicateurs + cercles (espèce, sexe) + histogramme (âge) + courbe (naissances)
+// ---------------------------------------------------------------------------
+void GSmartPetCare::onStatistiquesAnimaux()
+{
+    QVector<Animal> animaux;
+    QString erreur;
+    if (!Animal::afficher(animaux, &erreur)) {          // requête Oracle (animal.cpp)
+        QMessageBox::warning(this, "Oracle - Statistiques", erreur);
+        return;
+    }
+
+    QDialog dlg(this);
+    dlg.setWindowTitle("Statistiques des animaux");
+    dlg.setMinimumSize(1100, 700);
+    dlg.resize(1200, 760);
+    dlg.setStyleSheet(kStyleStats);
+
+    // ----- Calculs -----
+    QMap<QString, int> parEspece;
+    QMap<QString, int> parSexe;
+    QVector<double> parMois(12, 0.0);
+    int tranches[4] = { 0, 0, 0, 0 };                 // < 1 an, 1-3 ans, 4-7 ans, 8 ans et +
+    int suivisAFaire = 0;
+    const QDate aujourdhui = QDate::currentDate();
+
+    for (const Animal &a : std::as_const(animaux)) {
+        if (!a.espece.isEmpty()) parEspece[a.espece]++;
+        if (!a.sexe.isEmpty())   parSexe[a.sexe]++;
+        if (a.suiviSante.compare(kAJourAnimal, Qt::CaseInsensitive) != 0)
+            suivisAFaire++;
+        if (a.naissance.isValid()) {
+            parMois[a.naissance.month() - 1] += 1.0;
+            const int age = int(a.naissance.daysTo(aujourdhui) / 365);
+            if (age < 1)       tranches[0]++;
+            else if (age <= 3) tranches[1]++;
+            else if (age <= 7) tranches[2]++;
+            else               tranches[3]++;
+        }
+    }
+
+    QString especeDominante = "-";
+    int max = 0;
+    for (auto it = parEspece.constBegin(); it != parEspece.constEnd(); ++it) {
+        if (it.value() > max) {
+            max = it.value();
+            especeDominante = it.key();
+        }
+    }
+
+    // ----- Interface -----
+    auto *racine = new QVBoxLayout(&dlg);
+    racine->setContentsMargins(28, 24, 28, 24);
+    racine->setSpacing(14);
+
+    auto *titre = new QLabel("Statistiques des animaux", &dlg);
+    titre->setObjectName("titrePage");
+    racine->addWidget(titre);
+
+    auto *kpis = new QHBoxLayout;
+    kpis->setSpacing(14);
+    kpis->addWidget(creerKpi("Total animaux", QString::number(animaux.size()), &dlg));
+    kpis->addWidget(creerKpi(QString::fromUtf8("Espèces"), QString::number(parEspece.size()), &dlg));
+    kpis->addWidget(creerKpi(QString::fromUtf8("Espèce dominante"), especeDominante, &dlg));
+    kpis->addWidget(creerKpi(QString::fromUtf8("Suivis santé à faire"), QString::number(suivisAFaire), &dlg));
+    racine->addLayout(kpis);
+
+    auto *donutEspece = new DonutChart(&dlg);
+    donutEspece->setUnite("animaux");
+    donutEspece->setData(parEspece);
+
+    auto *donutSexe = new DonutChart(&dlg);
+    donutSexe->setUnite("animaux");
+    donutSexe->setData(parSexe);
+
+    auto *histoAge = new BarChart(&dlg);
+    QVector<QPair<QString, double>> ages;
+    ages.append({ QString::fromUtf8("< 1 an"),     double(tranches[0]) });
+    ages.append({ QString::fromUtf8("1-3 ans"),    double(tranches[1]) });
+    ages.append({ QString::fromUtf8("4-7 ans"),    double(tranches[2]) });
+    ages.append({ QString::fromUtf8("8 ans et +"), double(tranches[3]) });
+    histoAge->setData(ages, QColor("#F28C28"));
+
+    auto *courbe = new LineChart(&dlg);
+    const QStringList mois = { "Jan", QString::fromUtf8("Fév"), "Mar", "Avr", "Mai", "Juin",
+                               "Juil", QString::fromUtf8("Août"), "Sep", "Oct", "Nov", QString::fromUtf8("Déc") };
+    QVector<QPair<QString, double>> naissances;
+    for (int i = 0; i < 12; ++i)
+        naissances.append({ mois[i], parMois[i] });
+    courbe->setData(naissances);
+
+    auto *grille = new QGridLayout;
+    grille->setHorizontalSpacing(18);
+    grille->setVerticalSpacing(18);
+    grille->addWidget(creerCarte(QString::fromUtf8("Animaux par espèce"),
+                                 QString::fromUtf8("Répartition du nombre d'animaux selon leur espèce"),
+                                 donutEspece, &dlg), 0, 0);
+    grille->addWidget(creerCarte(QString::fromUtf8("Répartition par sexe"),
+                                 QString::fromUtf8("Mâles et femelles suivis par la clinique"),
+                                 donutSexe, &dlg), 0, 1);
+    grille->addWidget(creerCarte(QString::fromUtf8("Tranches d'âge"),
+                                 QString::fromUtf8("Nombre d'animaux par tranche d'âge"),
+                                 histoAge, &dlg), 1, 0);
+    grille->addWidget(creerCarte("Naissances par mois",
+                                 QString::fromUtf8("Mois de naissance des animaux enregistrés"),
+                                 courbe, &dlg), 1, 1);
+    grille->setColumnStretch(0, 1);
+    grille->setColumnStretch(1, 1);
+    grille->setRowStretch(0, 1);
+    grille->setRowStretch(1, 1);
+    racine->addLayout(grille, 1);
+
+    dlg.exec();
+}
+
+// ---------------------------------------------------------------------------
+// Chatbot : questions sur les animaux et leur dossier médical (rendez-vous et services : non inclus)
+// ---------------------------------------------------------------------------
+void GSmartPetCare::onChatbotAnimal()
+{
+    const int idChoisi = idAnimalSelectionne();
+
+    auto *dlg = new QDialog(this);
+    dlg->setAttribute(Qt::WA_DeleteOnClose);
+    dlg->setWindowTitle(QString::fromUtf8("PetNova — Assistant animaux"));
+    dlg->resize(780, 640);
+    dlg->setStyleSheet("QDialog{background:#F4F8F7;} QTextEdit{background:white;border:1px solid #D7E3E1;"
+                       "border-radius:8px;padding:8px;} QPushButton{background:#0F766E;color:white;"
+                       "border-radius:7px;padding:9px;} QLabel{color:#1F2A37;}");
+    auto *layout = new QVBoxLayout(dlg);
+    auto *titre = new QLabel(QString::fromUtf8("Assistant PetNova — animaux (données Oracle)"), dlg);
+    QFont f = titre->font(); f.setPointSize(16); f.setBold(true); titre->setFont(f);
+    layout->addWidget(titre);
+
+    auto *mode = new QComboBox(dlg);
+    mode->addItem(QString::fromUtf8("Tous les animaux / Mode global"), -1);
+    if (idChoisi >= 0)
+        mode->addItem(QString::fromUtf8("Animal sélectionné (ID %1)").arg(idChoisi), idChoisi);
+    layout->addWidget(mode);
+
+    auto *conversation = new QTextEdit(dlg);
+    conversation->setReadOnly(true);
+    conversation->setPlainText(QString::fromUtf8(
+        "PetNova : Bonjour. Je peux donner le nombre d'animaux, leur liste, la fiche d'un animal et son "
+        "dossier médical (allergies, traitements, vaccination, poids, antécédents...).\n"
+        "Pour un animal précis, indiquez son ID (ex. : animal 12) ou son nom exact.\n"
+        "Les rendez-vous et les services ne sont pas inclus dans cette version."));
+    layout->addWidget(conversation, 1);
+
+    auto *saisie = new QTextEdit(dlg);
+    saisie->setMaximumHeight(85);
+    saisie->setPlaceholderText(QString::fromUtf8("Ex. Combien d'animaux ? / Allergies animal 12 / Dossier médical de Max"));
+    layout->addWidget(saisie);
+
+    auto *actions = new QHBoxLayout;
+    auto *fermer = new QPushButton("Fermer", dlg);
+    auto *envoyer = new QPushButton("Interroger Oracle", dlg);
+    actions->addWidget(fermer); actions->addStretch(); actions->addWidget(envoyer);
+    layout->addLayout(actions);
+
+    connect(fermer, &QPushButton::clicked, dlg, &QDialog::close);
+    connect(envoyer, &QPushButton::clicked, dlg, [this, mode, conversation, saisie]() {
+        const QString question = saisie->toPlainText().trimmed();
+        if (question.isEmpty())
+            return;
+        conversation->append(QString::fromUtf8("\nVous : %1").arg(question));
+        conversation->append(QString::fromUtf8("PetNova : %1\n").arg(reponseChatbotAnimal(question, mode->currentData().toInt())));
+        saisie->clear();
+    });
+    dlg->show();
+}
+
+// idMode : -1 = mode global, sinon id de l'animal sélectionné. Toutes les données viennent de la classe Animal.
+QString GSmartPetCare::reponseChatbotAnimal(const QString &question, int idMode) const
+{
+    const QString q = normaliser(question);
+    auto contient = [&q](std::initializer_list<const char *> mots) {
+        for (const char *m : mots)
+            if (q.contains(QLatin1String(m)))
+                return true;
+        return false;
+    };
+    const bool compte  = contient({"combien", "nombre", "total"});
+    const bool liste   = contient({"liste", "tous les animaux", "afficher les animaux"});
+    const bool medical = contient({"antecedent", "allerg", "medical", "sante", "traitement", "vaccin",
+                                   "poids", "maladie", "chronique", "derniere consultation"});
+    const bool autreModule = !medical && contient({"rendez", "rdv", "consultation", "service", "prestation"});
+    QString erreur;
+
+    if (autreModule)
+        return QString::fromUtf8("Les rendez-vous, consultations et services ne sont pas inclus dans cette version "
+                                 "(module Animaux seulement).");
+
+    // --- Identification de l'animal : mode sélectionné, sinon « animal 12 » / « id 12 », sinon nom exact ---
+    int id = idMode;
+    if (id < 0) {
+        static const QRegularExpression reId(QString::fromUtf8(
+            R"((?:\b(?:animal\s*(?:id|n[°o.]|numero)?|id)\s*[:#-]?\s*|#)(\d+))"));
+        const QRegularExpressionMatch m = reId.match(q);
+        if (m.hasMatch()) {
+            id = m.captured(1).toInt();
+        } else {
+            QVector<Animal> tous;
+            if (!Animal::afficher(tous, &erreur))
+                return QString::fromUtf8("Erreur Oracle : %1").arg(erreur);
+            QVector<Animal> trouves;
+            for (const Animal &a : std::as_const(tous)) {
+                const QString nom = normaliser(a.nom).trimmed();
+                if (nom.isEmpty())
+                    continue;
+                const QRegularExpression mot("(?<![a-z0-9])" + QRegularExpression::escape(nom) + "(?![a-z0-9])");
+                if (mot.match(q).hasMatch())
+                    trouves.append(a);
+            }
+            if (trouves.size() == 1) {
+                id = trouves.first().id;
+            } else if (trouves.size() > 1) {
+                QStringList options;
+                for (const Animal &a : std::as_const(trouves))
+                    options << QString("%1 (ID %2)").arg(a.nom).arg(a.id);
+                return QString::fromUtf8("Plusieurs animaux correspondent : %1. Précisez l'ID.").arg(options.join(", "));
+            }
+        }
+    }
+
+    // --- Dossier médical d'un animal (champ précisé, sinon dossier complet) ---
+    if (id >= 0 && medical) {
+        Animal a;
+        if (!Animal::obtenirMedical(id, a, &erreur))
+            return QString::fromUtf8("Impossible de charger le dossier médical : %1").arg(erreur);
+        auto valeur = [](const QString &v) { return v.trimmed().isEmpty() ? QString::fromUtf8("Non renseigné") : v; };
+        QString vaccin = QString::fromUtf8("Inconnu");
+        if (a.statutVaccinal == "A_JOUR") vaccin = QString::fromUtf8("À jour");
+        else if (a.statutVaccinal == "INCOMPLET") vaccin = "Incomplet";
+
+        const QVector<QPair<QStringList, QString>> champs = {
+            { {"antecedent"},            QString::fromUtf8("Antécédents : ") + valeur(a.antecedentsMedicaux) },
+            { {"maladie", "chronique"},  QString::fromUtf8("Maladies chroniques : ") + valeur(a.maladiesChroniques) },
+            { {"allerg"},                QString::fromUtf8("Allergies : ") + valeur(a.allergies) },
+            { {"traitement"},            QString::fromUtf8("Traitements en cours : ") + valeur(a.traitementsEnCours) },
+            { {"vaccin"},                QString::fromUtf8("Vaccination : ") + vaccin },
+            { {"poids"},                 QString::fromUtf8("Poids : ") + (a.poids > 0 ? QString::number(a.poids, 'f', 2) + " kg"
+                                                                                       : QString::fromUtf8("Non renseigné")) },
+            { {"derniere consultation"}, QString::fromUtf8("Dernière consultation : ")
+                                         + (a.derniereConsultation.isValid() ? a.derniereConsultation.toString("dd/MM/yyyy")
+                                                                             : QString::fromUtf8("Non renseignée")) },
+            { {"suivi"},                 QString::fromUtf8("Suivi santé : ") + valeur(a.suiviSante) },
+        };
+        QStringList lignes;
+        for (const auto &c : champs)
+            for (const QString &mot : c.first)
+                if (q.contains(mot)) { lignes << c.second; break; }
+        if (lignes.isEmpty())                       // question générale : dossier complet
+            for (const auto &c : champs)
+                lignes << c.second;
+        return QString::fromUtf8("Animal : %1 (ID %2)\n").arg(a.nom).arg(a.id) + lignes.join("\n");
+    }
+
+    // --- Nombre d'animaux (avec répartition par espèce) ---
+    if (compte && contient({"animal", "animaux"})) {
+        int total = 0;
+        Animal::Comptage parEspece;
+        if (!Animal::compter(total, &erreur) || !Animal::repartitionParEspece(parEspece, &erreur))
+            return QString::fromUtf8("Erreur Oracle : %1").arg(erreur);
+        QStringList details;
+        for (const auto &e : std::as_const(parEspece))
+            details << QString("%1 : %2").arg(e.first).arg(e.second);
+        return QString::fromUtf8("Nombre d'animaux enregistrés : %1.").arg(total)
+               + (details.isEmpty() ? QString() : "\n" + details.join("\n"));
+    }
+
+    // --- Liste des animaux ---
+    if (liste && id < 0) {
+        QVector<Animal> tous;
+        if (!Animal::afficher(tous, &erreur))
+            return QString::fromUtf8("Erreur Oracle : %1").arg(erreur);
+        if (tous.isEmpty())
+            return QString::fromUtf8("Aucun animal enregistré.");
+        QStringList lignes;
+        for (int i = 0; i < tous.size() && i < 20; ++i)
+            lignes << QString::fromUtf8("%1 — %2 — %3 — %4").arg(formaterIdAnimal(tous[i].id), tous[i].nom,
+                                                                tous[i].espece, tous[i].proprietaire);
+        if (tous.size() > 20)
+            lignes << QString::fromUtf8("... et %1 autres animaux.").arg(tous.size() - 20);
+        return lignes.join("\n");
+    }
+
+    // --- Fiche d'un animal ---
+    if (id >= 0) {
+        Animal a;
+        if (!Animal::obtenir(id, a, &erreur))
+            return QString::fromUtf8("Erreur Oracle : %1").arg(erreur);
+        return QString::fromUtf8("Animal : %1 (ID %2)\nEspèce : %3\nSexe : %4\nNaissance : %5\n"
+                                 "Propriétaire : %6\nTéléphone : %7\nSuivi santé : %8")
+            .arg(a.nom).arg(a.id).arg(a.espece, a.sexe, a.naissance.toString("dd/MM/yyyy"),
+                                      a.proprietaire, a.telephone, a.suiviSante);
+    }
+
+    if (medical)
+        return QString::fromUtf8("Indiquez le nom exact ou l'ID de l'animal, ou sélectionnez le mode Animal sélectionné.");
+    return QString::fromUtf8("Question non reconnue. Essayez : « Combien d'animaux ? », « Liste des animaux », "
+                             "« Animal 12 », « Allergies animal 12 » ou « Dossier médical de Max ».");
+}
+
+// ---------------------------------------------------------------------------
+// Dossier médical (7 listes déroulantes) : page enfant de pageAnimaux
+// ---------------------------------------------------------------------------
+void GSmartPetCare::onDossierMedicalAnimal()
+{
+    const int id = idAnimalSelectionne();
+    if (id < 0) {
+        QMessageBox::information(this, "Prédiction santé", "Sélectionnez d'abord un animal dans le tableau.");
+        return;
+    }
+    Animal a;
+    QString erreur;
+    if (!Animal::obtenirMedical(id, a, &erreur)) {
+        QMessageBox::warning(this, "Dossier médical",
+            "Impossible de charger le dossier médical local.\n" + erreur);
+        return;
+    }
+
+    // Widget enfant de pageAnimaux : aucune nouvelle fenêtre et aucun deuxième .ui.
+    auto *page = new QFrame(ui->pageAnimaux);
+    page->setObjectName("dossierMedicalAnimaux");
+    page->setGeometry(ui->pageAnimaux->rect());
+    page->setStyleSheet("QFrame#dossierMedicalAnimaux{background:#F4F8F7;}"
+                        "QLabel{color:#1F2A37;} QTextEdit,QDoubleSpinBox,QDateEdit{"
+                        "background:white;border:1px solid #C8DAD7;border-radius:6px;padding:5px;}"
+                        "QComboBox{background:#FFFFFF;border:1px solid #A7C8C3;border-radius:7px;"
+                        "padding:5px 32px 5px 12px;min-height:32px;max-height:32px;color:#173A36;}"
+                        "QComboBox::drop-down{border-left:1px solid #C8DAD7;width:30px;"
+                        "background:#DDEFEA;border-top-right-radius:6px;border-bottom-right-radius:6px;}"
+                        "QComboBox::down-arrow{image:none;border-left:5px solid transparent;"
+                        "border-right:5px solid transparent;border-top:6px solid #0F766E;"
+                        "width:0px;height:0px;}"
+                        "QComboBox QAbstractItemView{background:white;selection-background-color:#DDEFEA;"
+                        "selection-color:#173A36;outline:0px;}"
+                        "QPushButton{background:#0F766E;color:white;border-radius:7px;padding:9px;font-weight:bold;}"
+                        "QPushButton:hover{background:#0B5F59;}");
+    auto *outer = new QVBoxLayout(page);
+    auto *header = new QHBoxLayout;
+    auto *title = new QLabel(QString::fromUtf8("DOSSIER MÉDICAL — 7 LISTES DÉROULANTES (S7) — %1 (#%2)").arg(a.nom).arg(a.id), page);
+    QFont titleFont = title->font(); titleFont.setPointSize(16); titleFont.setBold(true); title->setFont(titleFont);
+    auto *retour = new QPushButton("Retour aux animaux", page);
+    header->addWidget(title, 1); header->addWidget(retour);
+    outer->addLayout(header);
+
+    auto *scroll = new QScrollArea(page); scroll->setWidgetResizable(true); scroll->setFrameShape(QFrame::NoFrame);
+    auto *content = new QWidget(scroll); auto *form = new QFormLayout(content);
+    form->setSpacing(12);
+    form->setFieldGrowthPolicy(QFormLayout::AllNonFixedFieldsGrow);
+    form->setFormAlignment(Qt::AlignTop);
+
+    // Tous les champs du formulaire sont des QComboBox.
+    auto medicalCombo = [&](const QString &label, const QString &value, const QStringList &choices) {
+        auto *w = new QComboBox(content);
+        w->setEditable(false);
+        w->setFixedHeight(42);
+        w->setMinimumWidth(340);
+        w->setStyleSheet("QComboBox { background: #ffffff; color: #183333; border: 1px solid #a9c8c6; border-radius: 5px; padding: 7px 12px; } "
+                         "QComboBox::drop-down { subcontrol-origin: padding; subcontrol-position: top right; width: 34px; border-left: 1px solid #a9c8c6; background: #e4f1ef; } "
+                         "QComboBox::down-arrow { image: none; border-left: 5px solid transparent; border-right: 5px solid transparent; border-top: 7px solid #075a55; width: 0; height: 0; } "
+                         "QComboBox QAbstractItemView { background: white; color: #183333; selection-background-color: #b9dfdb; }");
+        w->addItem("Non renseigné");
+        for (const QString &choice : choices) w->addItem(choice);
+        if (!value.trimmed().isEmpty() && w->findText(value) < 0) w->addItem(value);
+        w->setCurrentText(value.trimmed().isEmpty() ? "Non renseigné" : value);
+        w->setInsertPolicy(QComboBox::NoInsert);
+        form->addRow(label, w);
+        return w;
+    };
+    auto *ante = medicalCombo("Antécédents médicaux", a.antecedentsMedicaux,
+        {"Aucun", "Opération chirurgicale", "Fracture / blessure", "Infection antérieure",
+         "Trouble digestif", "Maladie respiratoire", "Autre (à préciser)"});
+    auto *chron = medicalCombo("Maladies chroniques", a.maladiesChroniques,
+        {"Aucune", "Diabète", "Maladie cardiaque", "Maladie rénale",
+         "Arthrose", "Épilepsie", "Asthme", "Autre (à préciser)"});
+    auto *allerg = medicalCombo("Allergies connues", a.allergies,
+        {"Aucune connue", "Allergie alimentaire", "Allergie médicamenteuse",
+         "Allergie environnementale", "Autre (à préciser)"});
+    auto *trait = medicalCombo("Traitements en cours", a.traitementsEnCours,
+        {"Aucun", "Traitement antiparasitaire", "Traitement dermatologique",
+         "Traitement chronique prescrit", "Autre traitement (à préciser)"});
+
+    auto *poids = new QComboBox(content);
+    poids->setEditable(true);
+    poids->setFixedHeight(42);
+    poids->setInsertPolicy(QComboBox::NoInsert);
+    poids->addItem("Non renseigné", 0.0);
+    for (int i = 1; i <= 100; i++) poids->addItem(QString::number(i) + " kg", double(i));
+    poids->setCurrentText(a.poids > 0 ? QString::number(a.poids, 'f', 2) + " kg" : "Non renseigné");
+    form->addRow("Poids (kg)", poids);
+
+    auto *vacc = new QComboBox(content);
+    vacc->setFixedHeight(42);
+    vacc->addItem("Inconnu", "INCONNU"); vacc->addItem("À jour", "A_JOUR"); vacc->addItem("Incomplet", "INCOMPLET");
+    const int vi = vacc->findData(a.statutVaccinal); vacc->setCurrentIndex(vi < 0 ? 0 : vi);
+    form->addRow("Statut vaccinal", vacc);
+
+    auto *consult = new QComboBox(content);
+    consult->setEditable(true);
+    consult->setFixedHeight(42);
+    consult->setInsertPolicy(QComboBox::NoInsert);
+    consult->addItem("Non renseignée");
+    consult->addItem("Aujourd'hui");
+    consult->addItem("Il y a 1 mois");
+    consult->addItem("Il y a 6 mois");
+    consult->addItem("Il y a 1 an");
+    consult->setCurrentText(a.derniereConsultation.isValid()
+        ? a.derniereConsultation.toString("dd/MM/yyyy") : "Non renseignée");
+    form->addRow("Dernière consultation", consult);
+
+    scroll->setWidget(content); outer->addWidget(scroll, 1);
+    auto *resultat = new QTextEdit(page); resultat->setReadOnly(true); resultat->setMaximumHeight(170);
+    resultat->setPlaceholderText("L'analyse des risques apparaîtra ici."); outer->addWidget(resultat);
+    auto *actions = new QHBoxLayout; auto *save = new QPushButton("Enregistrer le dossier médical", page);
+    auto *analyser = new QPushButton("Analyser les risques", page);
+    actions->addWidget(save); actions->addWidget(analyser); outer->addLayout(actions);
+
+    // Lecture des 7 champs vers un Animal (retourne false si une valeur est invalide)
+    auto lire = [=](Animal &b) -> bool {
+        b.antecedentsMedicaux = (ante->currentIndex() == 0 ? QString() : ante->currentText().trimmed());
+        b.maladiesChroniques  = (chron->currentIndex() == 0 ? QString() : chron->currentText().trimmed());
+        b.allergies           = (allerg->currentIndex() == 0 ? QString() : allerg->currentText().trimmed());
+        b.traitementsEnCours  = (trait->currentIndex() == 0 ? QString() : trait->currentText().trimmed());
+        QString poidsTexte = poids->currentText().trimmed();
+        if (poidsTexte == "Non renseigné" || poidsTexte.isEmpty()) b.poids = 0;
+        else {
+            poidsTexte.remove("kg", Qt::CaseInsensitive);
+            poidsTexte = poidsTexte.trimmed().replace(',', '.');
+            bool ok = false; const double p = poidsTexte.toDouble(&ok);
+            if (!ok || p <= 0 || p > 9999.99) {
+                QMessageBox::warning(page, "Validation", "Poids invalide. Indiquez une valeur positive en kg.");
+                return false;
+            }
+            b.poids = p;
+        }
+        b.statutVaccinal = vacc->currentData().toString();
+        const QString dateTexte = consult->currentText().trimmed();
+        if (dateTexte.isEmpty() || dateTexte == "Non renseignée") b.derniereConsultation = QDate();
+        else if (dateTexte == "Aujourd'hui") b.derniereConsultation = QDate::currentDate();
+        else if (dateTexte == "Il y a 1 mois") b.derniereConsultation = QDate::currentDate().addMonths(-1);
+        else if (dateTexte == "Il y a 6 mois") b.derniereConsultation = QDate::currentDate().addMonths(-6);
+        else if (dateTexte == "Il y a 1 an") b.derniereConsultation = QDate::currentDate().addYears(-1);
+        else {
+            b.derniereConsultation = QDate::fromString(dateTexte, "dd/MM/yyyy");
+            if (!b.derniereConsultation.isValid())
+                b.derniereConsultation = QDate::fromString(dateTexte, "yyyy-MM-dd");
+            if (!b.derniereConsultation.isValid()) {
+                QMessageBox::warning(page, "Validation", "Date invalide. Utilisez JJ/MM/AAAA.");
+                return false;
+            }
+        }
+        if (b.derniereConsultation.isValid() && b.derniereConsultation > QDate::currentDate()) {
+            QMessageBox::warning(page, "Validation", "La dernière consultation ne peut pas être future.");
+            return false;
+        }
+        return true;
+    };
+
+    connect(save, &QPushButton::clicked, page, [=]() {
+        Animal b = a; if (!lire(b)) return;
+        if (b.antecedentsMedicaux.size() > 1000 || b.maladiesChroniques.size() > 500 ||
+            b.allergies.size() > 500 || b.traitementsEnCours.size() > 1000) {
+            QMessageBox::warning(page, "Validation", "Un champ médical dépasse la longueur autorisée."); return;
+        }
+        QString e;
+        if (!Animal::enregistrerMedical(b, &e)) QMessageBox::warning(page, "Fichier médical", e);
+        else QMessageBox::information(page, "Dossier médical", "Informations enregistrées dans dossiers_medicaux.txt.");
+    });
+    connect(analyser, &QPushButton::clicked, page, [=]() {
+        Animal b = a; if (!lire(b)) return;
+        QStringList alertes, points;
+        if (!b.maladiesChroniques.isEmpty()) alertes << "Maladie chronique déclarée : suivi vétérinaire régulier conseillé.";
+        if (!b.allergies.isEmpty()) alertes << "Allergies déclarées : signaler ces informations avant tout traitement.";
+        if (b.statutVaccinal == "INCOMPLET") alertes << "Vaccination incomplète : vérifier les rappels avec un vétérinaire.";
+        if (b.statutVaccinal == "INCONNU") points << "Statut vaccinal à confirmer.";
+        if (!b.derniereConsultation.isValid()) points << "Dernière consultation non renseignée.";
+        else if (b.derniereConsultation.daysTo(QDate::currentDate()) > 365) points << "Dernière consultation datant de plus de 12 mois : contrôle préventif à envisager.";
+        if (b.poids <= 0) points << "Poids non renseigné : impossible d'évaluer une tendance pondérale.";
+        if (!b.traitementsEnCours.isEmpty()) points << "Traitement en cours : ne pas le modifier sans avis vétérinaire.";
+        if (!b.antecedentsMedicaux.isEmpty()) points << "Antécédents présents : à examiner avec le vétérinaire.";
+        if (alertes.isEmpty()) alertes << "Aucun facteur d'alerte détecté parmi les champs renseignés.";
+        resultat->setPlainText("ANALYSE INDICATIVE — " + b.nom + "\n\n" +
+            alertes.join("\n") + "\n\nPoints de vigilance :\n" + points.join("\n") +
+            "\n\nCe résultat est un repérage par règles, pas une prédiction clinique. "
+            "Les données absentes ne signifient pas absence de risque. Aucun traitement ne doit être prescrit automatiquement.");
+    });
+    connect(retour, &QPushButton::clicked, page, &QWidget::deleteLater);
+    page->show(); page->raise();
+}
+
+// ---------------------------------------------------------------------------
+// Export PDF de la liste affichée (filtres SQL en cours)
+// ---------------------------------------------------------------------------
+void GSmartPetCare::onExporterPdfAnimaux()
+{
+    if (m_vueAnimaux.isEmpty()) {
+        QMessageBox::information(this, "Exporter PDF", QString::fromUtf8("Aucun animal à exporter."));
+        return;
+    }
+
+    const QString suggestion = QDir::homePath() + "/animaux_" +
+                               QDate::currentDate().toString("yyyy-MM-dd") + ".pdf";
+    QString chemin = QFileDialog::getSaveFileName(
+        this, "Exporter la liste des animaux", suggestion, "Fichiers PDF (*.pdf)");
+    if (chemin.isEmpty())
+        return;                                               // l'utilisateur a annulé
+    if (!chemin.endsWith(".pdf", Qt::CaseInsensitive))
+        chemin += ".pdf";
+
+    if (!genererPdfAnimaux(chemin, m_vueAnimaux)) {
+        QMessageBox::critical(this, "Exporter PDF",
+                              QString::fromUtf8("Impossible de créer le fichier PDF.\n"
+                                                "Vérifiez que le fichier n'est pas ouvert dans un autre programme."));
+        return;
+    }
+
+    const auto rep = QMessageBox::question(
+        this, "Exporter PDF",
+        QString::fromUtf8("Le PDF a été créé avec succès.\n\nVoulez-vous l'ouvrir ?"));
+    if (rep == QMessageBox::Yes)
+        QDesktopServices::openUrl(QUrl::fromLocalFile(chemin));
+}
+
+bool GSmartPetCare::genererPdfAnimaux(const QString &chemin, const QVector<Animal> &lignes) const
+{
+    const QStringList entetes = {
+        "ID", "Nom", QString::fromUtf8("Espèce"), "Sexe", "Naissance",
+        QString::fromUtf8("Propriétaire"), QString::fromUtf8("Téléphone"), QString::fromUtf8("Suivi santé")
+    };
+    const QList<int> largeurs = { 7, 13, 10, 9, 12, 19, 13, 17 };   // en %
+
+    QString html;
+    html += "<h1 style='color:#1B5E4B;'>PetNova - Liste des animaux</h1>";
+    html += QString("<p style='color:#6B7280;'>")
+            + QString::fromUtf8("Exporté le ")
+            + QDateTime::currentDateTime().toString("dd/MM/yyyy HH:mm")
+            + QString(" - %1 animaux</p>").arg(lignes.size());
+
+    html += "<table width='100%' cellspacing='0' cellpadding='7'><tr>";
+    for (int i = 0; i < entetes.size(); ++i) {
+        html += QString("<td width='%1%' align='center' "
+                        "style='background-color:#1B5E4B; color:white; font-weight:bold;'>%2</td>")
+                    .arg(largeurs[i]).arg(entetes[i].toHtmlEscaped());
+    }
+    html += "</tr>";
+
+    for (int r = 0; r < lignes.size(); ++r) {
+        const Animal &a = lignes[r];
+        const QString fond = (r % 2 == 0) ? "#FFFFFF" : "#EEF3F1";
+        const QStringList valeurs = { formaterIdAnimal(a.id), a.nom, a.espece, a.sexe,
+                                      a.naissance.toString("dd/MM/yyyy"), a.proprietaire, a.telephone, a.suiviSante };
+        html += "<tr>";
+        for (int col = 0; col < valeurs.size(); ++col) {
+            QString style = QString("background-color:%1; color:#1F2A37;").arg(fond);
+            if (col == AnimalColSuivi) {
+                const bool aJour = a.suiviSante.compare(kAJourAnimal, Qt::CaseInsensitive) == 0;
+                style += QString(" color:%1; font-weight:bold;").arg(aJour ? "#0F766E" : "#B45309");
+            }
+            html += QString("<td align='center' style='%1'>%2</td>").arg(style, valeurs[col].toHtmlEscaped());
+        }
+        html += "</tr>";
+    }
+    html += "</table>";
+
+    {
+        QPdfWriter writer(chemin);
+        writer.setPageSize(QPageSize(QPageSize::A4));
+        writer.setPageOrientation(QPageLayout::Landscape);
+        writer.setPageMargins(QMarginsF(12, 12, 12, 12), QPageLayout::Millimeter);
+        writer.setTitle(QString::fromUtf8("Liste des animaux - PetNova"));
+
+        QTextDocument doc;
+        doc.setHtml(html);
+        doc.print(&writer);
+    }   // le fichier est finalisé ici
+
+    const QFileInfo info(chemin);
+    return info.exists() && info.size() > 0;
 }

@@ -7,13 +7,15 @@ SOURCES += \
     connection.cpp \
     gsmartpetcare.cpp \
     RendezVous.cpp \
-    service.cpp
+    service.cpp \
+    animal.cpp
 
 HEADERS += \
     connection.h \
     gsmartpetcare.h \
     RendezVous.h \
-    service.h
+    service.h \
+    animal.h
 
 FORMS += \
     gsmartpetcare.ui
