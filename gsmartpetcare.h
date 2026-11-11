@@ -3,15 +3,12 @@
 
 #include <QMainWindow>
 
-#include "donneesemployes.h"
+#include "employe.h"
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class GSmartPetCare; }
 QT_END_NAMESPACE
 
-class GestionServices;
-class GestionRdv;
-class GestionAnimaux;
 class Connexion;
 class GestionEmployes;
 class StatistiquesEmployes;
@@ -47,16 +44,6 @@ private:
 
     // Affiche une page du contenu et met en surbrillance le bouton du menu correspondant
     void afficherContenu(int index);
-
-    // Logique de la page « Gestion des services » (widgets définis dans le .ui)
-    GestionServices *gestionServices = nullptr;
-
-    // Logique de la page « Gestion des rendez-vous » (widgets définis dans le même .ui)
-    GestionRdv *gestionRdv = nullptr;
-
-    // Logique de la page « Gestion des animaux » (page pageAnimaux, même .ui). Fournit la liste des
-    // animaux au module Services (historique des services rendus).
-    GestionAnimaux *m_animaux = nullptr;
 
     // ----- Module employés (pages pageEmployes, pageStatsEmployes, pagePrivileges, pageVisage du même .ui) -----
     BaseEmployes m_baseEmployes;                 // employés en mémoire (+ visages enregistrés)

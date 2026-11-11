@@ -8,53 +8,17 @@ CONFIG   += c++17
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000
 
 SOURCES += \
+    employe.cpp \
     connection.cpp \
     main.cpp \
-    gsmartpetcare.cpp \
-    gestionservices.cpp \
-    gestionrdv.cpp \
-    gestionanimaux.cpp \
-    service.cpp \
-    statistiquesanimaux.cpp \
-    historiqueservices.cpp \
-    statistiquesservices.cpp \
-    donutchart.cpp \
-    barchart.cpp \
-    linechart.cpp \
-    statistiquesdialog.cpp \
-    gestionemployes.cpp \
-    statistiquesemployes.cpp \
-    connexion.cpp \
-    privileges.cpp \
-    faceauth.cpp \
-    facedialog.cpp \
-    faceengine.cpp
+    gsmartpetcare.cpp
 
 HEADERS += \
+    employe.h \
     connection.h \
-    gsmartpetcare.h \
-    gestionservices.h \
-    gestionrdv.h \
-    gestionanimaux.h \
-    service.h \
-    statistiquesanimaux.h \
-    historiqueservices.h \
-    statistiquesservices.h \
-    donutchart.h \
-    barchart.h \
-    linechart.h \
-    donnees.h \
-    statistiquesdialog.h \
-    gestionemployes.h \
-    statistiquesemployes.h \
-    connexion.h \
-    privileges.h \
-    faceauth.h \
-    facedialog.h \
-    faceengine.h \
-    donneesemployes.h
+    gsmartpetcare.h
 
-# Un seul fichier .ui pour toute l'application (services, rendez-vous, employés, animaux)
+# Un seul fichier .ui pour toute l'application (seul le module employés a du code ; services, rendez-vous et animaux : interface seule)
 FORMS += \
     gsmartpetcare.ui
 
@@ -75,11 +39,25 @@ unix {
         DEFINES += HAVE_OPENCV
     }
 }
-# Windows : décommentez et adaptez ces lignes (OpenCV compilé avec le même compilateur que Qt).
-# OPENCV_DIR = C:/opencv/build
-# INCLUDEPATH += $$OPENCV_DIR/include
-# LIBS += -L$$OPENCV_DIR/x64/vc16/lib -lopencv_world480
-# DEFINES += HAVE_OPENCV
+
+# Windows : OpenCV 4.10.0 compilé avec MinGW 13.1.0 (le même compilateur que Qt)
+win32 {
+    OPENCV_DIR = C:/opencv4/opencv-4.10.0/build/install
+    exists($$OPENCV_DIR/include) {
+        INCLUDEPATH += $$OPENCV_DIR/include
+        LIBS += -L$$OPENCV_DIR/x64/mingw/lib \
+                -lopencv_core4100 \
+                -lopencv_imgproc4100 \
+                -lopencv_imgcodecs4100 \
+                -lopencv_videoio4100 \
+                -lopencv_objdetect4100 \
+                -lopencv_dnn4100 \
+                -lopencv_calib3d4100 \
+                -lopencv_features2d4100 \
+                -lopencv_flann4100
+        DEFINES += HAVE_OPENCV
+    }
+}
 
 # Règles de déploiement par défaut
 qnx: target.path = /tmp/$${TARGET}/bin

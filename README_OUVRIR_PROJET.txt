@@ -8,4 +8,3 @@ PETNOVA - OUVERTURE SUR UN AUTRE PC
 6. En cas d erreur, relever le texte exact dans la fenetre Compile Output.
 
 Un seul fichier .ui: gsmartpetcare.ui.
-Le bouton Historique des services reste dans le module Services uniquement.

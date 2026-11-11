@@ -4819,19 +4819,19 @@ QPushButton:hover { background-color: #E8F5F3; }
   <customwidget>
    <class>DonutChart</class>
    <extends>QWidget</extends>
-   <header>donutchart.h</header>
+   <header>employe.h</header>
    <container>1</container>
   </customwidget>
   <customwidget>
    <class>BarChart</class>
    <extends>QWidget</extends>
-   <header>barchart.h</header>
+   <header>employe.h</header>
    <container>1</container>
   </customwidget>
   <customwidget>
    <class>LineChart</class>
    <extends>QWidget</extends>
-   <header>linechart.h</header>
+   <header>employe.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>

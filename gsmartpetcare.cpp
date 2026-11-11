@@ -1,14 +1,6 @@
 #include "gsmartpetcare.h"
 #include "ui_gsmartpetcare.h"
-#include "gestionservices.h"
-#include "gestionrdv.h"
-#include "gestionanimaux.h"
-#include "connexion.h"
-#include "facedialog.h"
-#include "faceauth.h"
-#include "gestionemployes.h"
-#include "privileges.h"
-#include "statistiquesemployes.h"
+#include "employe.h"
 
 #include <QGraphicsDropShadowEffect>
 #include <QIcon>
@@ -40,28 +32,7 @@ GSmartPetCare::GSmartPetCare(QWidget *parent)
     connect(ui->lineEditMotDePasse, &QLineEdit::returnPressed,
             ui->pushButtonConnexion, &QPushButton::click);
 
-    // Page « Gestion des services » : les widgets sont dans ce même .ui (pageServices),
-    // GestionServices se charge de leur comportement.
-    gestionServices = new GestionServices(ui, this, this);
-
-    // Page « Gestion des rendez-vous » : même principe (pageRDV dans ce même .ui).
-    gestionRdv = new GestionRdv(ui, this, this);
-
-    // Page « Gestion des animaux » : même principe (pageAnimaux dans ce même .ui). C'est elle qui fournit
-    // au module Services la liste des animaux de l'historique des services rendus.
-    m_animaux = new GestionAnimaux(ui, this, this);
-    gestionServices->setAnimaux(m_animaux->animaux());
-    ui->badgeAnimaux->setText(QString::number(m_animaux->nombreAnimaux()));
-    connect(m_animaux, &GestionAnimaux::animauxChanges, this, [this]() {
-        gestionServices->setAnimaux(m_animaux->animaux());
-        ui->badgeAnimaux->setText(QString::number(m_animaux->nombreAnimaux()));
-    });
-    connect(m_animaux, &GestionAnimaux::animalSupprime, this, [this](int animalId) {
-        gestionServices->animalSupprime(animalId);      // efface aussi son historique de services
-    });
-    connect(m_animaux, &GestionAnimaux::historiqueDemande, this, [this](int animalId) {
-        gestionServices->afficherHistorique(animalId);
-    });
+    // Pages Services, Rendez-vous et Animaux : interface seule (widgets du .ui), aucun métier branché.
 
     // Module « Gestion des employés » : même principe (pageEmployes, pageStatsEmployes, pagePrivileges
     // et pageVisage dans ce même .ui). Les employés servent aussi à l'authentification.
@@ -139,7 +110,6 @@ void GSmartPetCare::onConnecte(int employeId)
     m_employes->setUtilisateur(employeId);      // applique les privilèges de l'employé connecté
     if (const Employe *e = m_baseEmployes.trouver(employeId)) {
         ui->labelBienvenue->setText(QString("Bienvenue %1 %2  -  Rôle : %3").arg(e->prenom, e->nom, e->poste));
-        m_animaux->setUtilisateur(e->prenom + " " + e->nom);   // nom affiché dans l'assistant de diagnostic
     }
     afficherContenu(ContenuAccueil);
     ui->stackedWidget->setCurrentIndex(PageAccueil);
